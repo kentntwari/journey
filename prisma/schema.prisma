@@ -1,0 +1,92 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+// Looking for ways to speed up your queries, or scale easily with your serverless or edge functions?
+// Try Prisma Accelerate: https://pris.ly/cli/accelerate-init
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model User {
+  id           String    @id @default(cuid())
+  firstName    String    @map("first_name")
+  lastName     String    @map("last_name")
+  email        String    @unique
+  journeys     Journey[]
+}
+
+model Journey {
+  id    String @id @default(cuid())
+  title String
+
+  checkpoints Checkpoint[]
+  User        User?        @relation(fields: [userId], references: [id])
+  userId      String?
+  createdAt   DateTime     @default(now()) @map("created_at") @db.Date
+  updatedAt   DateTime     @updatedAt @map("updated_at") @db.Date
+
+  @@map("journeys")
+}
+
+model Checkpoint {
+  id          String   @id @default(cuid())
+  title       String
+  description String
+  startDate   DateTime @map("start_date") @db.Date
+
+  journey    Journey?    @relation(fields: [journeyId], references: [id])
+  journeyId  String?
+  milestones Milestone[]
+  challenges Challenge[]
+  failures   Failure[]
+
+  createdAt DateTime @default(now()) @map("created_at") @db.Date
+  updatedAt DateTime @updatedAt @map("updated_at") @db.Date
+
+  @@map("checkpoints")
+}
+
+model Milestone {
+  id          String   @id @default(cuid())
+  status      String   @default("in progress")
+  deadline    DateTime @db.Date
+  description String
+
+  Checkpoint   Checkpoint? @relation(fields: [checkpointId], references: [id])
+  checkpointId String?
+
+  createdAt DateTime @default(now()) @map("created_at") @db.Date
+  updatedAt DateTime @updatedAt @map("updated_at") @db.Date
+
+  @@map("milestones")
+}
+
+model Challenge {
+  id           String      @id @default(cuid())
+  description  String
+  Checkpoint   Checkpoint? @relation(fields: [checkpointId], references: [id])
+  checkpointId String?
+
+  createdAt DateTime @default(now()) @map("created_at") @db.Date
+  updatedAt DateTime @updatedAt @map("updated_at") @db.Date
+
+  @@map("challenges")
+}
+
+model Failure {
+  id           String      @id @default(cuid())
+  description  String
+  Checkpoint   Checkpoint? @relation(fields: [checkpointId], references: [id])
+  checkpointId String?
+
+  createdAt DateTime @default(now()) @map("created_at") @db.Date
+  updatedAt DateTime @updatedAt @map("updated_at") @db.Date
+
+  @@map("failures")
+}
