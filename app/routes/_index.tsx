@@ -1,41 +1,25 @@
-import type { MetaFunction } from "@remix-run/node";
+import { getKindeSession } from "@kinde-oss/kinde-remix-sdk";
 
-export const meta: MetaFunction = () => {
-  return [
-    { title: "New Remix App" },
-    { name: "description", content: "Welcome to Remix!" },
-  ];
-};
+import { redirect } from "@remix-run/react";
+import type { LoaderFunctionArgs } from "@remix-run/node";
+
+export async function loader({ params, request }: LoaderFunctionArgs) {
+  const { getUser } = await getKindeSession(request);
+  const user = await getUser();
+
+  if (!user) return null;
+  else throw redirect("/journeys");
+}
 
 export default function Index() {
   return (
-    <div style={{ fontFamily: "system-ui, sans-serif", lineHeight: "1.8" }}>
-      <h1>Welcome to Remix</h1>
-      <ul>
-        <li>
-          <a
-            target="_blank"
-            href="https://remix.run/tutorials/blog"
-            rel="noreferrer"
-          >
-            15m Quickstart Blog Tutorial
-          </a>
-        </li>
-        <li>
-          <a
-            target="_blank"
-            href="https://remix.run/tutorials/jokes"
-            rel="noreferrer"
-          >
-            Deep Dive Jokes App Tutorial
-          </a>
-        </li>
-        <li>
-          <a target="_blank" href="https://remix.run/docs" rel="noreferrer">
-            Remix Docs
-          </a>
-        </li>
-      </ul>
-    </div>
+    <>
+      <div className="w-full px-3 m-auto">
+        <h1 className="w-full m-auto font-bold text-center text-2xl text-balance text-global-neutral-grey-900">
+          <span className="text-global-blue-900">Document your career</span> and
+          keep tabs on the most valuable insights
+        </h1>{" "}
+      </div>
+    </>
   );
 }
