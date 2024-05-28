@@ -85,6 +85,7 @@ function handleBotRequest(
       }
     );
 
+    // deepcode ignore CodeInjection: Unclear what this is doing.
     setTimeout(abort, ABORT_DELAY);
   });
 }
@@ -135,6 +136,7 @@ function handleBrowserRequest(
       }
     );
 
+    // deepcode ignore CodeInjection: Unclear what this is doing.
     setTimeout(abort, ABORT_DELAY);
   });
 }

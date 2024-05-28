@@ -1,5 +1,3 @@
-import { getKindeSession } from "@kinde-oss/kinde-remix-sdk";
-
 import type { LinksFunction, LoaderFunctionArgs } from "@remix-run/node";
 import stylesheet from "~/tailwind.css?url";
 
@@ -12,17 +10,26 @@ import {
   Scripts,
   ScrollRestoration,
   useLoaderData,
+  useNavigate,
 } from "@remix-run/react";
 
+import { Button } from "./components/ui/button";
+
+import { verifyUser } from "./.server/verifyUser";
+
 export const links: LinksFunction = () => [
+  {
+    rel: "stylesheet",
+    href: "https://rsms.me/inter/inter.css",
+    crossOrigin: "anonymous",
+  },
   { rel: "stylesheet", href: stylesheet },
 ];
 
 export async function loader({ request }: LoaderFunctionArgs) {
-  const { getUser } = await getKindeSession(request);
-  const user = await getUser();
+  const { isAuthenticated, user } = await verifyUser(request);
 
-  return json({ isAuthenticated: !!user, user });
+  return json({ isAuthenticated, user });
 }
 
 export function Layout({ children }: { children: React.ReactNode }) {
@@ -37,10 +44,10 @@ export function Layout({ children }: { children: React.ReactNode }) {
         <Links />
       </head>
       <body
-        className={`pb-4 min-h-screen min-h-[100dvh] flex flex-col text-sm text-global-neutral-grey-1000 ${
+        className={`pb-4 min-h-screen min-h-[100dvh] grid grid-rows-[72px_1fr] space-y-4 text-sm text-neutral-grey-1000 ${
           t.isAuthenticated
-            ? "bg-global-neutral-grey-200"
-            : "lg:px-[120px] bg-global-neutral-grey-300"
+            ? "bg-neutral-grey-200"
+            : "lg:px-[120px] bg-neutral-grey-300"
         }`}
       >
         {children}
@@ -53,19 +60,18 @@ export function Layout({ children }: { children: React.ReactNode }) {
 
 export default function App() {
   const t = useLoaderData<typeof loader>();
+  const navigate = useNavigate();
+
   return (
     <>
-      <nav className="px-3 w-full h-[72px] flex items-center justify-between">
-        <Link to="/" className="font-bold text-xl text-black">
+      <nav className="px-3 w-full h-full flex items-center justify-between border-b border-neutral-grey-600">
+        <Link to="/" className="font-bold text-lg text-black">
           Journey.
         </Link>
         {!t.user ? (
-          <Link
-            to={`/journeys`}
-            className="bg-global-blue-900 w-[104px] h-[36px] flex items-center justify-center font-medium text-sm text-white rounded-md"
-          >
+          <Button size="sm" onClick={() => navigate("/journeys")}>
             Get started
-          </Link>
+          </Button>
         ) : (
           <Link to={"/kinde-auth/logout"} className="cursor-pointer">
             {t.user?.picture && (
@@ -79,7 +85,7 @@ export default function App() {
         )}
       </nav>
 
-      <main className="grow border-t border-global-neutral-grey-600">
+      <main className="grow grid">
         <Outlet />
       </main>
     </>
