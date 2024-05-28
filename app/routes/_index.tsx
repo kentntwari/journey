@@ -1,14 +1,14 @@
-import { getKindeSession } from "@kinde-oss/kinde-remix-sdk";
+import { verifyUser } from "~/.server/verifyUser";
 
-import { redirect } from "@remix-run/react";
+import { redirect } from "@remix-run/node";
 import type { LoaderFunctionArgs } from "@remix-run/node";
 
 export async function loader({ params, request }: LoaderFunctionArgs) {
-  const { getUser } = await getKindeSession(request);
-  const user = await getUser();
+  const { isAuthenticated } = await verifyUser(request);
 
-  if (!user) return null;
-  else throw redirect("/journeys");
+  if (!isAuthenticated) return null;
+
+  throw redirect("/journeys");
 }
 
 export default function Index() {
