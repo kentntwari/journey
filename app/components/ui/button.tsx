@@ -9,10 +9,10 @@ const buttonVariants = cva(
   {
     variants: {
       variant: {
-        primary: "bg-blue-900 text-white hover:bg-blue-900/90",
-        destructive: "bg-red-900 text-white hover:bg-red-900/90",
+        primary: "bg-blue-900 text-white",
+        destructive: "bg-red-900 text-white",
         neutral:
-          "bg-white text-neutral-grey-1000 hover:bg-neutral-grey-1000/90 border border-neutral-grey-500 shadow-sm",
+          "bg-white text-neutral-grey-1000 border border-neutral-grey-500 shadow-sm",
       },
       size: {
         "2xs": "h-[30px] px-2 text-2xs",
