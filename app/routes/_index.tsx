@@ -10,7 +10,6 @@ export async function loader({ params, request }: LoaderFunctionArgs) {
 
   throw redirect("/journeys");
 }
-
 export default function Index() {
   return (
     <>
