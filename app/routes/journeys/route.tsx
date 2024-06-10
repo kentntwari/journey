@@ -2,13 +2,14 @@ import { z } from "zod";
 import { parseWithZod } from "@conform-to/zod";
 import { useForm, getFormProps, getTextareaProps } from "@conform-to/react";
 
-import { useState } from "react";
+import { useState, useRef } from "react";
 import {
   useLoaderData,
   useActionData,
   useFetcher,
   json,
   redirect,
+  Link,
 } from "@remix-run/react";
 import type { LoaderFunctionArgs, ActionFunctionArgs } from "@remix-run/node";
 
@@ -71,10 +72,13 @@ export async function action({ request }: ActionFunctionArgs) {
 export default function Journeys() {
   const [addJourney, setAddJourney] = useState(false);
 
+  const textInputRef = useRef<HTMLTextAreaElement>(null);
+
   const { journeys, currentUser } = useLoaderData<typeof loader>();
+
   const lastResult = useActionData<typeof action>();
 
-  const fetcher = useFetcher<typeof action>({ key: "journeys" });
+  const fetcher = useFetcher<typeof action>({ key: "list-of-journeys" });
 
   const [form, fields] = useForm({
     // // Sync the result of last submission
@@ -104,7 +108,7 @@ export default function Journeys() {
 
   return (
     <section
-      className={`px-3 min-h-[30rem] ${
+      className={`mt-4 px-3 min-h-[30rem] ${
         journeys.length === 0 ? "m-auto" : "auto"
       } space-y-4`}
     >
@@ -152,6 +156,7 @@ export default function Journeys() {
             <div className="w-full h-44 p-4 flex flex-col justify-between items-end bg-blue-200 border border-blue-900 rounded-lg">
               <div className="w-full space-y-1">
                 <Textarea
+                  ref={textInputRef}
                   maxLength={100}
                   placeholder="Write title here..."
                   {...getTextareaProps(fields.title)}
@@ -171,7 +176,12 @@ export default function Journeys() {
                 >
                   Cancel
                 </Button>
-                <Button type="submit" variant="primary" size="2xs">
+                <Button
+                  type="submit"
+                  variant="primary"
+                  size="2xs"
+                  disabled={fetcher.state === "submitting"}
+                >
                   Save
                 </Button>
               </div>
@@ -183,28 +193,37 @@ export default function Journeys() {
       {journeys.length > 0 ? (
         <>
           {journeys.map((journey) => (
-            <article
-              key={journey.id}
-              className="bg-white p-4 min-h-[138px] max-h-[216px] flex flex-col justify-between items-start rounded-lg shadow-sm"
-            >
-              <header className="grow space-y-4">
-                <p className="font-semibold text-base">{journey.title}</p>
-                {journey.checkpoints.length > 0 ? (
-                  <></>
-                ) : (
-                  <span className="block text-xs text-neutral-grey-900">
-                    No checkpoints yet!
-                  </span>
-                )}
-              </header>
-              <Separator className="bg-neutral-grey-500 mb-2" />
-              <footer className="text-xs text-neutral-grey-900">
-                Last updated: {journey.updatedAt}
-              </footer>
+            <article key={journey.id}>
+              <Link
+                to={`/journeys/${journey.title}`}
+                prefetch="intent"
+                className="bg-white p-4 min-h-[138px] max-h-[216px] flex flex-col justify-between items-start rounded-lg shadow-sm"
+              >
+                <div className="grow space-y-4">
+                  <header>
+                    <p className="font-semibold text-base">{journey.title}</p>
+                  </header>
+                  {journey.checkpoints.length > 0 ? (
+                    <></>
+                  ) : (
+                    <span className="block text-xs text-neutral-grey-900">
+                      No checkpoints yet!
+                    </span>
+                  )}
+                </div>
+                <Separator className="bg-neutral-grey-500 mb-2" />
+                <footer className="text-xs text-neutral-grey-900">
+                  Last updated: {journey.updatedAt}
+                </footer>
+              </Link>
             </article>
           ))}
         </>
       ) : null}
     </section>
   );
+}
+
+export function ErrorBoundary() {
+  return <p>Error</p>;
 }

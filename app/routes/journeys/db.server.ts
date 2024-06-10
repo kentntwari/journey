@@ -1,4 +1,4 @@
-import prisma from "~/utils/prisma";
+import { prisma } from "~/utils/prisma";
 
 export async function getUserJourneys(userEmail: string) {
   const data = await prisma.user.findFirst({
