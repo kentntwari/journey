@@ -1,4 +1,5 @@
 import type { LinksFunction, LoaderFunctionArgs } from "@remix-run/node";
+
 import stylesheet from "~/tailwind.css?url";
 
 import {
@@ -44,7 +45,7 @@ export function Layout({ children }: { children: React.ReactNode }) {
         <Links />
       </head>
       <body
-        className={`pb-4 min-h-screen min-h-[100dvh] grid grid-rows-[72px_1fr] space-y-4 text-sm text-neutral-grey-1000 ${
+        className={`pb-4 min-h-screen min-h-[100dvh] grid grid-rows-[72px_1fr] text-sm text-neutral-grey-1000 ${
           t.isAuthenticated
             ? "bg-neutral-grey-200"
             : "lg:px-[120px] bg-neutral-grey-300"

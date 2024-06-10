@@ -39,6 +39,10 @@ export default function handleRequest(
       );
 }
 
+process.on("unhandledRejection", (error) => {
+  console.error(error);
+});
+
 function handleBotRequest(
   request: Request,
   responseStatusCode: number,
