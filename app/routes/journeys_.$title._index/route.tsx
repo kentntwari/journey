@@ -1,8 +1,7 @@
-import type { ActionFunctionArgs, LoaderFunctionArgs } from "@remix-run/node";
+import type { LoaderFunctionArgs } from "@remix-run/node";
 
 import { Suspense } from "react";
 import { Ellipsis } from "lucide-react";
-import { Provider as JotaiProvider } from "jotai";
 
 import {
   useParams,
@@ -11,13 +10,12 @@ import {
   redirect,
   Await,
 } from "@remix-run/react";
+import { ClientOnly } from "remix-utils/client-only";
 
-import { Button } from "~/components/ui/button";
-import * as Dialog from "~/components/ui/dialog";
-
-import * as CheckPoint from "~/routes/ressource.form.checkpoint/route";
 import { getJourneyCheckpoints } from "./db.server";
 import { verifyUser, redirectIfNotAuthenticated } from "~/.server/verifyUser";
+
+import { Modal } from "./Modal";
 
 export async function loader({ params, request }: LoaderFunctionArgs) {
   if (params.title) {
@@ -53,36 +51,37 @@ export default function Journey() {
         <Suspense fallback={<p>Loading...</p>}>
           <Await resolve={checkpoints} errorElement={<p>Error</p>}>
             {(checkpoints) => (
-              <Dialog.Dialog>
-                {checkpoints.length === 0 ? (
-                  <div className="w-full h-full flex items-center justify-center">
-                    <div className="w-[280px] space-y-4">
-                      <span className="block text-sm text-center text-neutral-grey-900">
-                        No checkpoints yet
-                      </span>
-                      <Dialog.DialogTrigger asChild>
-                        <Button size="md" className="w-full">
-                          Add checkpoint
-                        </Button>
-                      </Dialog.DialogTrigger>
-                    </div>
-                  </div>
-                ) : null}
+              <ClientOnly>
+                {() => (
+                  <Modal>
+                    {checkpoints.length === 0 ? (
+                      <div className="w-full h-full flex items-center justify-center">
+                        <div className="w-[280px] space-y-4">
+                          <span className="block text-sm text-center text-neutral-grey-900">
+                            No checkpoints yet
+                          </span>
 
-                {checkpoints.length > 0 ? (
-                  <>{JSON.stringify(checkpoints)}</>
-                ) : null}
+                          <Modal.Btn>Add checkpoint</Modal.Btn>
+                        </div>
+                      </div>
+                    ) : null}
 
-                <Dialog.DialogPortal>
-                  <Dialog.DialogOverlay className="bg-black/60">
-                    <Dialog.DialogContent className="inset-0 top-32 translate-x-0 translate-y-0 py-4 px-0 bg-neutral-grey-200 rounded-t-lg overflow-auto">
-                      <JotaiProvider>
-                        <CheckPoint.Form />
-                      </JotaiProvider>
-                    </Dialog.DialogContent>
-                  </Dialog.DialogOverlay>
-                </Dialog.DialogPortal>
-              </Dialog.Dialog>
+                    {checkpoints.length > 0 ? (
+                      <>
+                        {checkpoints.map((checkpoint) => (
+                          <div key={checkpoint.id}>
+                            {checkpoint.milestones.map((milestone) => (
+                              <div key={milestone.id}>
+                                {milestone.description}
+                              </div>
+                            ))}
+                          </div>
+                        ))}
+                      </>
+                    ) : null}
+                  </Modal>
+                )}
+              </ClientOnly>
             )}
           </Await>
         </Suspense>
