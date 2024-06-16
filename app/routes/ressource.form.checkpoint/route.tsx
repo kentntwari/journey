@@ -1,6 +1,6 @@
-import type { ActionFunctionArgs, LoaderFunctionArgs } from "@remix-run/node";
-import type { ShouldRevalidateFunctionArgs } from "@remix-run/react";
+import type { ActionFunctionArgs } from "@remix-run/node";
 
+import { atom, useAtomValue, useAtom, useSetAtom } from "jotai";
 import { parseWithZod } from "@conform-to/zod";
 import {
   FormProvider,
@@ -9,12 +9,13 @@ import {
   getTextareaProps,
   getInputProps,
 } from "@conform-to/react";
-
 import { Ellipsis, XIcon } from "lucide-react";
 
-import { useParams } from "@remix-run/react";
+import { redirect, json } from "@remix-run/node";
+import { useParams, useSubmit, Form as RemixForm } from "@remix-run/react";
 
-import { Milestones } from "./milestones";
+import * as db from "./db.server";
+import { Milestones } from "./Milestones";
 
 import { Input } from "~/components/ui/input";
 import { Button } from "~/components/ui/button";
@@ -22,52 +23,90 @@ import * as Dialog from "~/components/ui/dialog";
 import { Textarea } from "~/components/ui/textarea";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "~/components/ui/tabs";
 
-import * as zodSchema from "~/utils/schemas";
+import { checkpointSchema } from "~/utils/schemas";
+import { pendingMilestonesAtom, isDialogOpenAtom } from "~/utils/atoms";
 
-export async function loader({ params, request }: LoaderFunctionArgs) {
-  return null;
-}
+export async function action({ request, params }: ActionFunctionArgs) {
+  const formData = await request.formData();
 
-export async function action({ request }: ActionFunctionArgs) {
-  return null;
-}
+  const submission = parseWithZod(formData, {
+    schema: checkpointSchema,
+  });
 
-export async function shouldRevalidate({
-  defaultShouldRevalidate,
-}: ShouldRevalidateFunctionArgs) {
-  return false;
+  if (submission.status !== "success") {
+    return json(submission.reply());
+  }
+
+  await db.createNewCheckpoint({
+    journeyTitle: submission.value.journeyTitle,
+    title: submission.value.title,
+    description: submission.value.description,
+    startDate: submission.value.startDate,
+    milestones: submission.value.milestones,
+    challenges: [],
+    failures: [],
+  });
+
+  return redirect("/journeys/" + submission.value.journeyTitle);
 }
 
 export function Form() {
   const params = useParams();
 
+  const submit = useSubmit();
+
+  const pendingMilestones = useAtomValue(pendingMilestonesAtom);
+
+  const setIsDialogOpen = useSetAtom(isDialogOpenAtom);
+
   const [form, fields] = useForm({
     id: "checkpoint",
     onValidate({ formData }) {
-      return parseWithZod(formData, { schema: zodSchema.checkpointSchema });
+      return parseWithZod(formData, { schema: checkpointSchema });
     },
-    shouldValidate: "onBlur",
+    onSubmit(e) {
+      e.preventDefault();
+
+      const formData = new FormData(e.currentTarget);
+
+      if (pendingMilestones.length > 0) {
+        pendingMilestones.forEach((milestone, index) => {
+          formData.append(`milestones[${index}]`, JSON.stringify(milestone));
+        });
+      }
+
+      submit(formData, {
+        method: "post",
+        action: "/ressource/form/checkpoint",
+        fetcherKey: "checkpoint",
+        navigate: false,
+      });
+
+      setIsDialogOpen(false);
+    },
     shouldRevalidate: "onInput",
   });
-
-  const milestones = fields.milestones.getFieldList();
-  const challenges = fields.challenges.getFieldList();
-  const failures = fields.failures.getFieldList();
 
   return (
     <>
       <section className="px-3">
         <FormProvider context={form.context}>
-          <form
+          <RemixForm
             {...getFormProps(form)}
             method="POST"
             action="/ressource/form/checkpoint"
-            onSubmit={(e) => e.preventDefault()}
+            onSubmit={form.onSubmit}
           >
             <header className="flex items-center justify-between">
               <h3 className="font-semibold text-xl">New checkpoint</h3>
               <div className="flex items-center gap-3">
-                <Button type="submit" size="sm" className="w-[72px]">
+                <Button
+                  type="submit"
+                  name="intent"
+                  value="create-checkout"
+                  size="sm"
+                  className="w-[72px]"
+                >
                   Save
                 </Button>
                 <button type="button">
@@ -79,7 +118,18 @@ export function Form() {
               </div>
             </header>
 
+            <input
+              hidden
+              name={fields.journeyTitle.name}
+              defaultValue={params.title}
+            />
             <fieldset className="mt-10 space-y-6">
+              <input
+                hidden
+                type={"date"}
+                name="startDate"
+                defaultValue={new Date().toISOString().split("T")[0]}
+              />
               <button type="button" className="uppercase text-blue-900">
                 SELECT START DATE
               </button>
@@ -95,6 +145,7 @@ export function Form() {
                     })}
                     id="title"
                     placeholder="Write title here..."
+                    defaultValue={"dscdscdscsdc"}
                     className="bg-white border-neutral-grey-500 rounded-lg shadow-none placeholder:font-normal placeholder:text-sm placeholder:text-neutral-grey-900"
                   />
                   <small className="text-2xs text-neutral-grey-900">
@@ -108,6 +159,7 @@ export function Form() {
                   </label>
                   <Textarea
                     {...getTextareaProps(fields.description)}
+                    defaultValue={"xsxsxsaxs"}
                     id="description"
                     className="h-24 bg-white border-neutral-grey-500 rounded-lg shadow-none"
                   />
@@ -117,7 +169,7 @@ export function Form() {
                 </div>
               </div>
             </fieldset>
-          </form>
+          </RemixForm>
         </FormProvider>
       </section>
       <section className="mt-8">
@@ -130,15 +182,6 @@ export function Form() {
                 className={`px-2 min-w-[140px] h-10 flex items-center gap-2 data-[state=active]:bg-transparent data-[state=active]:border-b-2 data-[state=active]:font-semibold capitalize ${colors}`}
               >
                 <span className="block inherit">{tab}</span>
-                <small
-                  className={`block min-w-5 h-[18px] tabular-nums rounded`}
-                >
-                  {tab === "milestones"
-                    ? milestones.length
-                    : tab === "challenges"
-                    ? challenges.length
-                    : failures.length}
-                </small>
               </TabsTrigger>
             ))}
           </TabsList>
