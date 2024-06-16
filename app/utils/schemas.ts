@@ -19,10 +19,16 @@ export const failureSchema = z.object({
 });
 
 export const checkpointSchema = z.object({
+  journeyTitle: z.string().nonempty(),
   startDate: z.date(),
   title: z.string().min(1).max(50),
   description: z.string().min(1).max(1000),
-  milestones: z.array(milestoneSchema),
+  milestones: z
+    .preprocess((val) => {
+      if (typeof val === "string") return JSON.parse(val);
+      return val;
+    }, milestoneSchema)
+    .array(),
   challenges: z.array(challengeSchema),
   failures: z.array(failureSchema),
 });
