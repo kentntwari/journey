@@ -2,6 +2,8 @@ import type { LinksFunction, LoaderFunctionArgs } from "@remix-run/node";
 
 import stylesheet from "~/tailwind.css?url";
 
+import { ScopeProvider as JotaiScopedProvider } from "jotai-scope";
+
 import {
   json,
   Link,
@@ -17,6 +19,8 @@ import {
 import { Button } from "./components/ui/button";
 
 import { verifyUser } from "./.server/verifyUser";
+
+import { isDialogOpenAtom } from "~/utils/atoms";
 
 export const links: LinksFunction = () => [
   {
@@ -51,7 +55,10 @@ export function Layout({ children }: { children: React.ReactNode }) {
             : "lg:px-[120px] bg-neutral-grey-300"
         }`}
       >
-        {children}
+        <JotaiScopedProvider atoms={[isDialogOpenAtom]}>
+          {children}
+        </JotaiScopedProvider>
+
         <ScrollRestoration />
         <Scripts />
       </body>
