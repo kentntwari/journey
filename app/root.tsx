@@ -55,9 +55,7 @@ export function Layout({ children }: { children: React.ReactNode }) {
             : "lg:px-[120px] bg-neutral-grey-300"
         }`}
       >
-        <JotaiScopedProvider atoms={[isDialogOpenAtom]}>
-          {children}
-        </JotaiScopedProvider>
+        {children}
 
         <ScrollRestoration />
         <Scripts />

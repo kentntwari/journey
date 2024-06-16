@@ -2,6 +2,7 @@ import type { LoaderFunctionArgs } from "@remix-run/node";
 
 import { Suspense } from "react";
 import { Ellipsis } from "lucide-react";
+import { ScopeProvider as JotaiScopedProvider } from "jotai-scope";
 
 import {
   useParams,
@@ -16,6 +17,7 @@ import { getJourneyCheckpoints } from "./db.server";
 import { verifyUser, redirectIfNotAuthenticated } from "~/.server/verifyUser";
 
 import { Modal } from "./Modal";
+import { isDialogOpenAtom } from "~/utils/atoms";
 
 export async function loader({ params, request }: LoaderFunctionArgs) {
   if (params.title) {
@@ -53,33 +55,35 @@ export default function Journey() {
             {(checkpoints) => (
               <ClientOnly>
                 {() => (
-                  <Modal>
-                    {checkpoints.length === 0 ? (
-                      <div className="w-full h-full flex items-center justify-center">
-                        <div className="w-[280px] space-y-4">
-                          <span className="block text-sm text-center text-neutral-grey-900">
-                            No checkpoints yet
-                          </span>
+                  <JotaiScopedProvider atoms={[isDialogOpenAtom]}>
+                    <Modal>
+                      {checkpoints.length === 0 ? (
+                        <div className="w-full h-full flex items-center justify-center">
+                          <div className="w-[280px] space-y-4">
+                            <span className="block text-sm text-center text-neutral-grey-900">
+                              No checkpoints yet
+                            </span>
 
-                          <Modal.Btn>Add checkpoint</Modal.Btn>
-                        </div>
-                      </div>
-                    ) : null}
-
-                    {checkpoints.length > 0 ? (
-                      <>
-                        {checkpoints.map((checkpoint) => (
-                          <div key={checkpoint.id}>
-                            {checkpoint.milestones.map((milestone) => (
-                              <div key={milestone.id}>
-                                {milestone.description}
-                              </div>
-                            ))}
+                            <Modal.Btn>Add checkpoint</Modal.Btn>
                           </div>
-                        ))}
-                      </>
-                    ) : null}
-                  </Modal>
+                        </div>
+                      ) : null}
+
+                      {checkpoints.length > 0 ? (
+                        <>
+                          {checkpoints.map((checkpoint) => (
+                            <div key={checkpoint.id}>
+                              {checkpoint.milestones.map((milestone) => (
+                                <div key={milestone.id}>
+                                  {milestone.description}
+                                </div>
+                              ))}
+                            </div>
+                          ))}
+                        </>
+                      ) : null}
+                    </Modal>
+                  </JotaiScopedProvider>
                 )}
               </ClientOnly>
             )}
