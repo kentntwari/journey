@@ -2,7 +2,7 @@ import { FieldMetadata, getTextareaProps } from "@conform-to/react";
 import { Textarea } from "~/components/ui/textarea";
 import { ComponentProps } from "react";
 
-export function TextareaConform({
+export function TextAreaConform({
   meta,
   ...props
 }: {
