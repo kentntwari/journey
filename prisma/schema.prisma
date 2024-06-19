@@ -14,11 +14,11 @@ datasource db {
 }
 
 model User {
-  id           String    @id @default(cuid())
-  firstName    String    @map("first_name")
-  lastName     String    @map("last_name")
-  email        String    @unique
-  journeys     Journey[]
+  id        String    @id @default(cuid())
+  firstName String    @map("first_name")
+  lastName  String    @map("last_name")
+  email     String    @unique
+  journeys  Journey[]
 }
 
 model Journey {
@@ -26,7 +26,7 @@ model Journey {
   title String
 
   checkpoints Checkpoint[]
-  User        User?        @relation(fields: [userId], references: [id])
+  User        User?        @relation(fields: [userId], references: [id], onDelete: Cascade, onUpdate: Cascade)
   userId      String?
   createdAt   DateTime     @default(now()) @map("created_at") @db.Date
   updatedAt   DateTime     @updatedAt @map("updated_at") @db.Date
@@ -40,7 +40,7 @@ model Checkpoint {
   description String
   startDate   DateTime @map("start_date") @db.Date
 
-  journey    Journey?    @relation(fields: [journeyId], references: [id])
+  journey    Journey?    @relation(fields: [journeyId], references: [id], onDelete: Cascade, onUpdate: Cascade)
   journeyId  String?
   milestones Milestone[]
   challenges Challenge[]
@@ -58,7 +58,7 @@ model Milestone {
   deadline    DateTime @db.Date
   description String
 
-  Checkpoint   Checkpoint? @relation(fields: [checkpointId], references: [id])
+  Checkpoint   Checkpoint? @relation(fields: [checkpointId], references: [id], onDelete: Cascade, onUpdate: Cascade)
   checkpointId String?
 
   createdAt DateTime @default(now()) @map("created_at") @db.Date
@@ -70,7 +70,7 @@ model Milestone {
 model Challenge {
   id           String      @id @default(cuid())
   description  String
-  Checkpoint   Checkpoint? @relation(fields: [checkpointId], references: [id])
+  Checkpoint   Checkpoint? @relation(fields: [checkpointId], references: [id], onDelete: Cascade, onUpdate: Cascade)
   checkpointId String?
 
   createdAt DateTime @default(now()) @map("created_at") @db.Date
@@ -82,7 +82,7 @@ model Challenge {
 model Failure {
   id           String      @id @default(cuid())
   description  String
-  Checkpoint   Checkpoint? @relation(fields: [checkpointId], references: [id])
+  Checkpoint   Checkpoint? @relation(fields: [checkpointId], references: [id], onDelete: Cascade, onUpdate: Cascade)
   checkpointId String?
 
   createdAt DateTime @default(now()) @map("created_at") @db.Date
