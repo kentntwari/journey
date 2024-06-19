@@ -2,7 +2,7 @@ import type * as React from "react";
 
 import { useAtom, useSetAtom, useAtomValue } from "jotai";
 
-import { useNavigate, useNavigation, useParams, Form } from "@remix-run/react";
+import { useNavigate, useNavigation, useParams } from "@remix-run/react";
 import { useHydrated } from "remix-utils/use-hydrated";
 
 import * as CheckPoint from "~/routes/ressource.form.checkpoint/route";
@@ -48,7 +48,7 @@ export function Modal({ children }: { children: React.ReactNode }) {
   );
 }
 
-interface ToggleModalBtnProps extends React.ComponentProps<"button"> {
+interface ToggleModalBtnProps extends React.ComponentProps<typeof Button> {
   children: React.ReactNode;
 }
 
@@ -58,18 +58,13 @@ export function ToggleModalBtn({ children }: ToggleModalBtnProps) {
   const navigation = useNavigation();
 
   return (
-    <Form>
-      <Button
-        name="_action"
-        value="add"
-        size="md"
-        disabled={navigation.state !== "idle"}
-        className="w-full "
-        onClick={() => !open && setOpen(true)}
-      >
-        {children}
-      </Button>
-    </Form>
+    <Button
+      disabled={navigation.state !== "idle"}
+      className="w-full "
+      onClick={() => !open && setOpen(true)}
+    >
+      {children}
+    </Button>
   );
 }
 
