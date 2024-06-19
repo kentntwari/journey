@@ -2,8 +2,9 @@ import type React from "react";
 
 import { z } from "zod";
 import { Plus } from "lucide-react";
-
 import { useAtomValue, useSetAtom } from "jotai";
+
+import { useEffect, Fragment } from "react";
 
 import { useSearchParams } from "@remix-run/react";
 
@@ -20,16 +21,27 @@ interface Milestonesprops {
   children?: React.ReactNode;
 }
 
+interface SingleMilestoneProps extends React.ComponentProps<"article"> {
+  status: z.infer<typeof milestoneSchema>["status"];
+  description: string;
+}
+
 Milestones.Form = Form;
 
 export function Milestones({ initialValues }: Milestonesprops) {
   const pendingMilestones = useAtomValue(pendingMilestonesAtom);
-
   const isAddMilestone = useAtomValue(isAddMilestoneAtom);
+  const setPendingMilestones = useSetAtom(pendingMilestonesAtom);
+  const setIsAddMilestone = useSetAtom(isAddMilestoneAtom);
 
   const [searchParams] = useSearchParams();
 
   const currentAction = searchParams.get("_action");
+
+  useEffect(() => {
+    setPendingMilestones([]);
+    setIsAddMilestone(false);
+  }, []);
 
   if ([...pendingMilestones, ...initialValues].length === 0)
     return (
@@ -72,9 +84,45 @@ export function Milestones({ initialValues }: Milestonesprops) {
           </Popover.PopoverContent>{" "}
         </div>
 
-        <div>{JSON.stringify(pendingMilestones)}</div>
+        <section className="space-y-3">
+          {pendingMilestones.map((milestone) => (
+            <Fragment key={milestone.id}>
+              <SingleMilestone
+                status={milestone.status}
+                description={milestone.description}
+              />
+            </Fragment>
+          ))}
+        </section>
       </div>
     </Popover.Popover>
+  );
+}
+
+function SingleMilestone({ status, description }: SingleMilestoneProps) {
+  return (
+    <article
+      className={`px-4 py-3 font-medium text-sm text-neutral-grey-1000
+       space-y-2 rounded-lg ${
+         status === "completed"
+           ? "bg-green-100 border border-green-500"
+           : "bg-neutral-grey-200 border border-neutral-grey-600"
+       }`}
+    >
+      <header className="flex items-center gap-2">
+        <span
+          className={`min-w-[72px] h-5 capitalize font-medium text-center 
+          text-2xs text-white rounded-[5px] ${
+            status === "completed" ? "bg-green-800" : "bg-neutral-grey-1000"
+          }`}
+        >
+          {status}
+        </span>
+      </header>
+      <footer className="capitalize font-medium text-sm text-balance">
+        {description}
+      </footer>
+    </article>
   );
 }
 
