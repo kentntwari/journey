@@ -1,6 +1,6 @@
 import type { ActionFunctionArgs } from "@remix-run/node";
 
-import { atom, useAtomValue, useAtom, useSetAtom } from "jotai";
+import { useAtomValue, useSetAtom } from "jotai";
 import { parseWithZod } from "@conform-to/zod";
 import {
   FormProvider,
@@ -16,6 +16,7 @@ import { useParams, useSubmit, Form as RemixForm } from "@remix-run/react";
 
 import * as db from "./db.server";
 import { Milestones } from "./Milestones";
+import { StartDateConform } from "./StartDateConform";
 
 import { Input } from "~/components/ui/input";
 import { Button } from "~/components/ui/button";
@@ -124,19 +125,23 @@ export function Form() {
               defaultValue={params.title}
             />
             <fieldset className="mt-10 space-y-6">
-              <input
-                hidden
-                type={"date"}
-                name="startDate"
-                defaultValue={new Date().toISOString().split("T")[0]}
-              />
-              <button type="button" className="uppercase text-blue-900">
-                SELECT START DATE
-              </button>
+              <StartDateConform meta={fields.startDate}>
+                {(date) => (
+                  <div className="flex items-center gap-4">
+                    <label htmlFor={fields.startDate.name}>Start date</label>
+                    <span className="px-[6px] h-5 rounded-[5px] bg-blue-300 font-medium text-2xs text-blue-1000">
+                      {date}
+                    </span>
+                  </div>
+                )}
+              </StartDateConform>
 
               <div className="space-y-4">
                 <div className="flex flex-col gap-y-[5px]">
-                  <label htmlFor="title" className="font-medium text-sm">
+                  <label
+                    htmlFor={fields.title.name}
+                    className="font-medium text-sm"
+                  >
                     Title*
                   </label>
                   <Input
@@ -145,7 +150,6 @@ export function Form() {
                     })}
                     id="title"
                     placeholder="Write title here..."
-                    defaultValue={"dscdscdscsdc"}
                     className="bg-white border-neutral-grey-500 rounded-lg shadow-none placeholder:font-normal placeholder:text-sm placeholder:text-neutral-grey-900"
                   />
                   <small className="text-2xs text-neutral-grey-900">
@@ -154,13 +158,14 @@ export function Form() {
                 </div>
 
                 <div className="flex flex-col gap-y-[5px]">
-                  <label htmlFor="title" className="font-medium text-sm">
+                  <label
+                    htmlFor={fields.description.name}
+                    className="font-medium text-sm"
+                  >
                     Description*
                   </label>
                   <Textarea
                     {...getTextareaProps(fields.description)}
-                    defaultValue={"xsxsxsaxs"}
-                    id="description"
                     className="h-24 bg-white border-neutral-grey-500 rounded-lg shadow-none"
                   />
                   <small className="text-2xs text-neutral-grey-900">
@@ -182,6 +187,7 @@ export function Form() {
                 className={`px-2 min-w-[140px] h-10 flex items-center gap-2 data-[state=active]:bg-transparent data-[state=active]:border-b-2 data-[state=active]:font-semibold capitalize ${colors}`}
               >
                 <span className="block inherit">{tab}</span>
+                <small>{pendingMilestones.length}</small>
               </TabsTrigger>
             ))}
           </TabsList>
