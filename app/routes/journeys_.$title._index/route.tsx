@@ -1,22 +1,21 @@
 import type { LoaderFunctionArgs } from "@remix-run/node";
 
-import { Suspense } from "react";
-import { Ellipsis } from "lucide-react";
+import { Suspense, Fragment } from "react";
+import { Ellipsis, ListFilter } from "lucide-react";
 import { ScopeProvider as JotaiScopedProvider } from "jotai-scope";
 
-import {
-  useParams,
-  useLoaderData,
-  defer,
-  redirect,
-  Await,
-} from "@remix-run/react";
+import { useParams, redirect, Form } from "@remix-run/react";
 import { ClientOnly } from "remix-utils/client-only";
+import { useTypedLoaderData, TypedAwait, typeddefer } from "remix-typedjson";
 
 import { getJourneyCheckpoints } from "./db.server";
 import { verifyUser, redirectIfNotAuthenticated } from "~/.server/verifyUser";
 
 import { Modal } from "./Modal";
+import { Checkpoint } from "./Checkpoint";
+
+import { Button } from "~/components/ui/button";
+
 import { isDialogOpenAtom } from "~/utils/atoms";
 
 export async function loader({ params, request }: LoaderFunctionArgs) {
@@ -25,7 +24,7 @@ export async function loader({ params, request }: LoaderFunctionArgs) {
 
     if (!user) throw redirectIfNotAuthenticated(params.title);
 
-    return defer({ checkpoints: getJourneyCheckpoints(params.title) });
+    return typeddefer({ checkpoints: getJourneyCheckpoints(params.title) });
   }
 
   throw redirect("/journeys");
@@ -34,7 +33,7 @@ export async function loader({ params, request }: LoaderFunctionArgs) {
 export default function Journey() {
   const params = useParams();
 
-  const { checkpoints } = useLoaderData<typeof loader>();
+  const { checkpoints } = useTypedLoaderData<typeof loader>();
 
   return (
     <section className="mt-6 px-3 flex flex-col gap-4">
@@ -49,9 +48,9 @@ export default function Journey() {
           {params.title}
         </h2>
       </header>
-      <footer className="grow bg-neutral-grey-300 rounded-lg border border-neutral-grey-500 shadow-none">
+      <footer className="grow bg-neutral-grey-300 px-2 py-4 rounded-lg border border-neutral-grey-500 shadow-none">
         <Suspense fallback={<p>Loading...</p>}>
-          <Await resolve={checkpoints} errorElement={<p>Error</p>}>
+          <TypedAwait resolve={checkpoints} errorElement={<p>Error</p>}>
             {(checkpoints) => (
               <ClientOnly>
                 {() => (
@@ -63,23 +62,63 @@ export default function Journey() {
                             <span className="block text-sm text-center text-neutral-grey-900">
                               No checkpoints yet
                             </span>
-
-                            <Modal.Btn>Add checkpoint</Modal.Btn>
+                            <Form>
+                              <Modal.Btn
+                                size="md"
+                                variant="primary"
+                                name="_action"
+                                value="add"
+                              >
+                                Add checkpoint
+                              </Modal.Btn>
+                            </Form>
                           </div>
                         </div>
                       ) : null}
 
                       {checkpoints.length > 0 ? (
                         <>
-                          {checkpoints.map((checkpoint) => (
-                            <div key={checkpoint.id}>
-                              {checkpoint.milestones.map((milestone) => (
-                                <div key={milestone.id}>
-                                  {milestone.description}
-                                </div>
-                              ))}
+                          <div className="flex items-center justify-between">
+                            <span className="block font-semibold text-sm text-neutral-grey-900">
+                              {checkpoints.length}{" "}
+                              {checkpoints.length > 1
+                                ? "checkpoints"
+                                : "checkpoint"}{" "}
+                              found
+                            </span>
+
+                            <div className="flex items-center gap-2">
+                              <Button
+                                size="xs"
+                                variant="neutral"
+                                className="w-fit bg-neutral-grey-500"
+                              >
+                                <ListFilter size="20" />
+                              </Button>
+                              <Form>
+                                <Modal.Btn
+                                  size="xs"
+                                  variant="primary"
+                                  name="_action"
+                                  value="add"
+                                >
+                                  Add checkpoint
+                                </Modal.Btn>
+                              </Form>
                             </div>
-                          ))}
+                          </div>
+                          <ul className="p-0 m-0 mt-7">
+                            {checkpoints.map((checkpoint, _, arr) => (
+                              <Fragment key={checkpoint.id}>
+                                <Checkpoint
+                                  data={checkpoint}
+                                  isLast={
+                                    checkpoint === arr.at(-1) ? true : false
+                                  }
+                                />
+                              </Fragment>
+                            ))}
+                          </ul>
                         </>
                       ) : null}
                     </Modal>
@@ -87,7 +126,7 @@ export default function Journey() {
                 )}
               </ClientOnly>
             )}
-          </Await>
+          </TypedAwait>
         </Suspense>
       </footer>
     </section>
