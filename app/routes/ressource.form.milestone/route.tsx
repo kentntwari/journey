@@ -12,7 +12,7 @@ import { Button } from "~/components/ui/button";
 import { Label } from "~/components/ui/label";
 
 import { SelectConform } from "~/components/conform/Select";
-import { TextareaConform } from "~/components/conform/TextArea";
+import { TextAreaConform } from "~/components/conform/TextArea";
 import { DatePickerConform } from "~/components/conform/DatePicker";
 
 import { milestoneSchema } from "~/utils/schemas";
@@ -101,7 +101,7 @@ export function Form() {
         </div>
         <div className="mt-2 row-start-3 col-span-2">
           <Label htmlFor={fields.description.id}>Description</Label>
-          <TextareaConform
+          <TextAreaConform
             {...getTextareaProps(fields.description)}
             meta={fields.description}
           />
