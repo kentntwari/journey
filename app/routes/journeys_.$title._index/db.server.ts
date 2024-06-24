@@ -23,19 +23,11 @@ export async function getJourneyCheckpoints(journeyTitle: string) {
         id: true,
         title: true,
         startDate: true,
-        milestones: {
+        _count: {
           select: {
-            id: true,
-          },
-        },
-        challenges: {
-          select: {
-            id: true,
-          },
-        },
-        failures: {
-          select: {
-            id: true,
+            milestones: true,
+            challenges: true,
+            failures: true,
           },
         },
       },
