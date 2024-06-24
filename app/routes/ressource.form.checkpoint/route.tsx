@@ -129,9 +129,7 @@ export function Form() {
                 {(date) => (
                   <div className="flex items-center gap-4">
                     <label htmlFor={fields.startDate.name}>Start date</label>
-                    <span className="px-[6px] h-5 rounded-[5px] bg-blue-300 font-medium text-2xs text-blue-1000">
-                      {date}
-                    </span>
+                    <span className="badge-date">{date}</span>
                   </div>
                 )}
               </StartDateConform>
