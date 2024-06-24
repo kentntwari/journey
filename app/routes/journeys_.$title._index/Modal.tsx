@@ -2,26 +2,64 @@ import type * as React from "react";
 
 import { useAtom, useSetAtom, useAtomValue } from "jotai";
 
-import { useNavigate, useNavigation, useParams } from "@remix-run/react";
-import { useHydrated } from "remix-utils/use-hydrated";
+import { useMemo } from "react";
 
-import * as CheckPoint from "~/routes/ressource.form.checkpoint/route";
+import { useNavigation, useSearchParams } from "@remix-run/react";
+
+import { useHandleCloseModal } from "~/hooks/useHandleCloseModal";
+
+import { Checkpoint } from "./Checkpoint";
 
 import * as Dialog from "~/components/ui/dialog";
 import { Button } from "~/components/ui/button";
 
+import { cn } from "~/utils/cn";
 import { isDialogOpenAtom } from "~/utils/atoms";
+
+interface ToggleModalBtnProps
+  extends Omit<React.ComponentProps<typeof Button>, "type"> {
+  children?: React.ReactNode;
+  executeFn?: () => void;
+}
+
+Modal.ToggleBtn = ToggleModalBtn;
 
 export function Modal({ children }: { children: React.ReactNode }) {
   const [open, setOpen] = useAtom(isDialogOpenAtom);
 
-  const params = useParams();
+  const [searchParams] = useSearchParams();
 
-  const hydrated = useHydrated();
+  const { handleCloseModal } = useHandleCloseModal();
 
-  const navigate = useNavigate();
+  const action = searchParams.get("_action");
 
-  const navigation = useNavigation();
+  const memoizedChildren = useMemo(() => {
+    if (!action)
+      return (
+        <div className="px-3">
+          <Checkpoint.Skeleton.Header />
+          <Checkpoint.Skeleton.Body />
+        </div>
+      );
+
+    switch (action) {
+      case "add":
+        return <Checkpoint.Form />;
+
+      case "read":
+        return (
+          <div className="px-3">
+            <Checkpoint.DetailsHeader />
+            <section className="relative mt-8 min-h-[300px]">
+              <Checkpoint.DetailsBody />
+            </section>
+          </div>
+        );
+
+      default:
+        return "Not found";
+    }
+  }, [action]);
 
   return (
     <Dialog.Dialog open={open} onOpenChange={setOpen}>
@@ -31,16 +69,9 @@ export function Modal({ children }: { children: React.ReactNode }) {
         <Dialog.DialogOverlay className="bg-black/60">
           <Dialog.DialogContent
             className="inset-0 top-32 translate-x-0 translate-y-0 py-4 px-0 bg-neutral-grey-200 rounded-t-lg overflow-auto"
-            onInteractOutside={(e) => {
-              if (navigation.state !== "idle") return;
-
-              if (hydrated) {
-                setOpen(false);
-                navigate("/journeys/" + params.title);
-              }
-            }}
+            onInteractOutside={handleCloseModal}
           >
-            <CheckPoint.Form />
+            {memoizedChildren}
           </Dialog.DialogContent>
         </Dialog.DialogOverlay>
       </Dialog.DialogPortal>
@@ -48,24 +79,40 @@ export function Modal({ children }: { children: React.ReactNode }) {
   );
 }
 
-interface ToggleModalBtnProps extends React.ComponentProps<typeof Button> {
-  children: React.ReactNode;
-}
-
-export function ToggleModalBtn({ children }: ToggleModalBtnProps) {
+export function ToggleModalBtn({
+  name,
+  value,
+  className,
+  children,
+  executeFn,
+  ...props
+}: ToggleModalBtnProps) {
   const open = useAtomValue(isDialogOpenAtom);
   const setOpen = useSetAtom(isDialogOpenAtom);
+
   const navigation = useNavigation();
+
+  const [, setSearchParams] = useSearchParams();
 
   return (
     <Button
+      {...props}
+      type="button"
       disabled={navigation.state !== "idle"}
-      className="w-full "
-      onClick={() => !open && setOpen(true)}
+      className={cn("w-full", className)}
+      onClick={() => {
+        !open && setOpen(true);
+
+        if (name && value)
+          setSearchParams((prev) => {
+            prev.set(name, String(value));
+            return prev;
+          });
+
+        if (executeFn) executeFn();
+      }}
     >
       {children}
     </Button>
   );
 }
-
-Modal.Btn = ToggleModalBtn;
