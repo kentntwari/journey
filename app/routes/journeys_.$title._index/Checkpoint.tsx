@@ -1,14 +1,27 @@
+import type { loader } from "./route";
+
 import { z } from "zod";
 import { nanoid } from "nanoid";
 import { format } from "date-fns";
+import { X, Ellipsis, ChevronLeft, ChevronRight } from "lucide-react";
+
+import { Suspense } from "react";
+
+import { useNavigation, useSubmit } from "@remix-run/react";
+import { useTypedRouteLoaderData, TypedAwait } from "remix-typedjson";
+
+import { useHandleCloseModal } from "~/hooks/useHandleCloseModal";
+import { useCurrentCheckpointDetails } from "~/hooks/useCurrentCheckpointDetails";
+
+import { Form } from "~/routes/ressource.form.checkpoint/route";
+
+import * as Skeletons from "./Skeletons";
 
 import { cn } from "~/utils/cn";
 import { skimmedCheckpointSchema } from "~/utils/schemas";
 
-interface CheckPointsProps extends React.ComponentProps<"div"> {
-  data: z.infer<typeof skimmedCheckpointSchema>;
-  isLast: boolean;
-}
+import { getJourneyCheckpoints } from "./db.server";
+import { generateCheckpointId, getCurrentPosition } from "./load";
 
 const metrics = [
   {
@@ -28,7 +41,24 @@ const metrics = [
   },
 ] as const;
 
-export function Checkpoint({ data, isLast, className }: CheckPointsProps) {
+export const Checkpoint = {
+  Snippet,
+  Form,
+  DetailsHeader: Header,
+  DetailsBody: Body,
+  Skeleton: {
+    Header: Skeletons.FetchingHeaderSkeleton,
+    Body: Skeletons.FetchingBodySkeleton,
+  },
+} as const;
+
+interface ICheckPointsProps extends React.ComponentProps<"div"> {
+  data: z.infer<typeof skimmedCheckpointSchema>;
+  isLast: boolean;
+  children?: React.ReactNode;
+}
+
+function Snippet({ data, isLast, className, children }: ICheckPointsProps) {
   return (
     <li
       className={cn(
@@ -66,15 +96,162 @@ export function Checkpoint({ data, isLast, className }: CheckPointsProps) {
               </span>
               <span className={`block font-bold text-base ${metric.hue}`}>
                 {metric.title == "milestones"
-                  ? data.milestones.length
+                  ? data.milestones
                   : metric.title === "challenges"
-                  ? data.challenges.length
-                  : data.failures.length}
+                  ? data.challenges
+                  : data.failures}
               </span>
             </div>
           ))}
         </footer>
       </div>
+      {children}
     </li>
   );
+}
+
+function Header() {
+  const navigation = useNavigation();
+
+  const { handleCloseModal } = useHandleCloseModal();
+
+  const deferredCheckpoints = useTypedRouteLoaderData<typeof loader>(
+    "routes/journeys_.$title._index"
+  );
+
+  return (
+    <header className="w-full flex items-center justify-between">
+      <div className="flex items-center gap-4">
+        <span className="font-medium text-sm">View checkpoint</span>
+
+        {deferredCheckpoints ? (
+          <Suspense fallback={<p>Loading positions...</p>}>
+            <TypedAwait
+              resolve={deferredCheckpoints.checkpoints}
+              errorElement={<p>Failed to load</p>}
+            >
+              {(checkpoints) => <LoadPosition checkpoints={checkpoints} />}
+            </TypedAwait>
+          </Suspense>
+        ) : null}
+      </div>
+      <div className="flex items-center gap-2">
+        <button
+          type="button"
+          name="_action"
+          value="edit"
+          disabled={navigation.state !== "idle"}
+        >
+          <span className="block h-5 uppercase font-medium text-sm text-blue-900">
+            Edit
+          </span>
+        </button>
+        <button type="button" className="w-6 inline-flex justify-end">
+          <Ellipsis size={20} />
+        </button>
+        <button
+          type="button"
+          className="w-6 inline-flex justify-end"
+          onClick={handleCloseModal}
+        >
+          <X size={20} />
+        </button>
+      </div>
+    </header>
+  );
+}
+
+interface ILoadPositionProps {
+  checkpoints: Awaited<ReturnType<typeof getJourneyCheckpoints>>;
+}
+
+function LoadPosition({ checkpoints }: ILoadPositionProps) {
+  const submit = useSubmit();
+
+  const data = useCurrentCheckpointDetails();
+
+  function loadCheckpoint(id: string) {
+    submit(null, {
+      action: "/ressource/checkpoint/" + id,
+      method: "POST",
+      navigate: false,
+      fetcherKey: "get-checkpoint-details",
+    });
+  }
+
+  function disableLoading() {
+    if (!data) return true;
+
+    if (checkpoints.length === 1) return true;
+
+    return false;
+  }
+
+  const currentPosition = !data?.results?.id
+    ? "-"
+    : getCurrentPosition(data.results.id, checkpoints) + 1;
+
+  const id = generateCheckpointId(data?.results?.id, checkpoints);
+
+  return (
+    <>
+      <div className="pl-2 inline-flex items-center gap-2 border-l border-neutral-grey-700">
+        <button
+          type="button"
+          disabled={disableLoading()}
+          onClick={() => {
+            if (id?.prev) loadCheckpoint(id.prev);
+          }}
+        >
+          <ChevronLeft size={20} className="text-neutral-grey-1000" />
+        </button>
+        <button
+          type="button"
+          disabled={disableLoading()}
+          onClick={() => {
+            if (id?.next) loadCheckpoint(id.next);
+          }}
+        >
+          <ChevronRight size={20} className="text-neutral-grey-1000" />
+        </button>
+        <span className="font-medium text-xs text-neutral-grey-800">
+          {currentPosition} of {checkpoints.length}
+        </span>
+      </div>
+    </>
+  );
+}
+//
+function Body() {
+  const data = useCurrentCheckpointDetails();
+
+  if (!data) return <Checkpoint.Skeleton.Body />;
+
+  if (data.error)
+    return (
+      <div className="absolute top-1/2 left-1/2 -translate-x-1/2">
+        Couldn't find this checkpoint
+      </div>
+    );
+
+  if (data.results)
+    return (
+      <>
+        <header className="space-y-3">
+          <span className="badge-date">
+            {format(data.results.startDate, "PPP")}
+          </span>
+          <h2 className="capitalize font-semibold text-xl">
+            {data.results.title}
+          </h2>
+        </header>
+
+        <div className="mt-4 p-3 space-y-2 min-h-[200px] border border-neutral-grey-500 rounded-lg">
+          <span className="block uppercase text-2xs text-neutral-grey-900">
+            Description
+          </span>
+          <p className="text-sm">{data.results.description}</p>
+        </div>
+      </>
+    );
 }
