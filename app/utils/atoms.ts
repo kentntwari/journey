@@ -6,6 +6,4 @@ export const isDialogOpenAtom = atom(false);
 
 export const isAddMilestoneAtom = atom(false);
 
-export const testAtom = atom("hi");
-
 export const pendingMilestonesAtom = atom<MileStoneEntry[]>([]);

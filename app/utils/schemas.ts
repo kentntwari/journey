@@ -39,22 +39,16 @@ export const skimmedCheckpointSchema = checkpointSchema
   .omit({
     journeyTitle: true,
     description: true,
+    milestones: true,
+    challenges: true,
+    failures: true,
   })
   .extend({
     id: z.string(),
-  })
-  .transform((data) => ({
-    ...data,
-    milestones: data.milestones.map((milestone) => ({
-      id: milestone.id,
-    })),
-    challenges: data.challenges.map((challenge) => ({
-      id: challenge.id,
-    })),
-    failures: data.failures.map((failure) => ({
-      id: failure.id,
-    })),
-  }));
+    milestones: z.number(),
+    challenges: z.number(),
+    failures: z.number(),
+  });
 
 export const journeySchema = z.object({
   id: z.string(),
