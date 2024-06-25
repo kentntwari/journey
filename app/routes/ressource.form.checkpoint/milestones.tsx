@@ -4,7 +4,7 @@ import { z } from "zod";
 import { Plus } from "lucide-react";
 import { useAtomValue, useSetAtom } from "jotai";
 
-import { useEffect, Fragment } from "react";
+import { Fragment } from "react";
 
 import { useSearchParams } from "@remix-run/react";
 
@@ -16,38 +16,31 @@ import * as Popover from "~/components/ui/popover";
 import { milestoneSchema } from "~/utils/schemas";
 import { isAddMilestoneAtom, pendingMilestonesAtom } from "~/utils/atoms";
 
-interface Milestonesprops {
+interface IMilestonesProps {
   initialValues: z.infer<typeof milestoneSchema>[];
   children?: React.ReactNode;
 }
 
-interface SingleMilestoneProps extends React.ComponentProps<"article"> {
+interface ISingleMilestoneProps extends React.ComponentProps<"article"> {
   status: z.infer<typeof milestoneSchema>["status"];
   description: string;
 }
 
 Milestones.Form = Form;
 
-export function Milestones({ initialValues }: Milestonesprops) {
+export function Milestones({ initialValues }: IMilestonesProps) {
   const pendingMilestones = useAtomValue(pendingMilestonesAtom);
   const isAddMilestone = useAtomValue(isAddMilestoneAtom);
-  const setPendingMilestones = useSetAtom(pendingMilestonesAtom);
-  const setIsAddMilestone = useSetAtom(isAddMilestoneAtom);
 
   const [searchParams] = useSearchParams();
 
   const currentAction = searchParams.get("_action");
 
-  useEffect(() => {
-    setPendingMilestones([]);
-    setIsAddMilestone(false);
-  }, []);
-
   if ([...pendingMilestones, ...initialValues].length === 0)
     return (
       <>
         {isAddMilestone ? (
-          <div className="form-wrapper-milestone">
+          <div className="form-wrapper">
             <Milestones.Form />
           </div>
         ) : (
@@ -78,7 +71,7 @@ export function Milestones({ initialValues }: Milestonesprops) {
             </Button>
           </Popover.PopoverTrigger>
           <Popover.PopoverContent className="p-0 border-none">
-            <div className="form-wrapper-milestone">
+            <div className="form-wrapper">
               <Milestones.Form />
             </div>
           </Popover.PopoverContent>{" "}
@@ -99,7 +92,7 @@ export function Milestones({ initialValues }: Milestonesprops) {
   );
 }
 
-function SingleMilestone({ status, description }: SingleMilestoneProps) {
+function SingleMilestone({ status, description }: ISingleMilestoneProps) {
   return (
     <article
       className={`px-4 py-3 font-medium text-sm text-neutral-grey-1000

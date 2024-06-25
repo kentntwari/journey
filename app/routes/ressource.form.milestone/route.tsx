@@ -117,7 +117,7 @@ export function Form() {
             Cancel
           </Button>
           <Button type="submit" size="sm" variant="primary">
-            Save & Create
+            Create
           </Button>
         </div>
       </RemixForm>
