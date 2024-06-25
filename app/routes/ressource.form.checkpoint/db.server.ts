@@ -9,6 +9,8 @@ export async function createNewCheckpoint({
   title,
   description,
   milestones,
+  challenges,
+  failures,
 }: z.infer<typeof zodSchema.checkpointSchema>) {
   try {
     const currentJourney = await prisma.journey.findFirst({
@@ -33,6 +35,16 @@ export async function createNewCheckpoint({
             status: milestone.status,
             description: milestone.description,
             deadline: milestone.deadline,
+          })),
+        },
+        challenges: {
+          create: challenges.map((challenge) => ({
+            description: challenge.description,
+          })),
+        },
+        failures: {
+          create: failures.map((failure) => ({
+            description: failure.description,
           })),
         },
       },
