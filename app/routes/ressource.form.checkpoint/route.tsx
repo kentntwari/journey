@@ -1,6 +1,6 @@
 import type { ActionFunctionArgs } from "@remix-run/node";
 
-import { useAtomValue, useSetAtom } from "jotai";
+import { useAtomValue, useSetAtom, useAtom } from "jotai";
 import { parseWithZod } from "@conform-to/zod";
 import {
   FormProvider,
@@ -15,17 +15,27 @@ import { redirect, json } from "@remix-run/node";
 import { useParams, useSubmit, Form as RemixForm } from "@remix-run/react";
 
 import * as db from "./db.server";
+import { Tabs } from "./Tabs";
 import { Milestones } from "./Milestones";
+import { Challenges } from "./Challenges";
+import { Failures } from "./Failures";
 import { StartDateConform } from "./StartDateConform";
 
 import { Input } from "~/components/ui/input";
 import { Button } from "~/components/ui/button";
 import * as Dialog from "~/components/ui/dialog";
 import { Textarea } from "~/components/ui/textarea";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "~/components/ui/tabs";
 
 import { checkpointSchema } from "~/utils/schemas";
-import { pendingMilestonesAtom, isDialogOpenAtom } from "~/utils/atoms";
+import {
+  pendingMilestonesAtom,
+  pendingChallengesAtom,
+  pendingFailuresAtom,
+  isDialogOpenAtom,
+  isAddChallengeAtom,
+  isAddMilestoneAtom,
+  isAddFailureAtom,
+} from "~/utils/atoms";
 
 export async function action({ request, params }: ActionFunctionArgs) {
   const formData = await request.formData();
@@ -44,8 +54,8 @@ export async function action({ request, params }: ActionFunctionArgs) {
     description: submission.value.description,
     startDate: submission.value.startDate,
     milestones: submission.value.milestones,
-    challenges: [],
-    failures: [],
+    challenges: submission.value.challenges,
+    failures: submission.value.failures,
   });
 
   return redirect("/journeys/" + submission.value.journeyTitle);
@@ -56,9 +66,19 @@ export function Form() {
 
   const submit = useSubmit();
 
-  const pendingMilestones = useAtomValue(pendingMilestonesAtom);
+  const [pendingMilestones, setPendingMilestones] = useAtom(
+    pendingMilestonesAtom
+  );
+  const [pendingChallenges, setPendingChallenges] = useAtom(
+    pendingChallengesAtom
+  );
+
+  const [pendingFailures, setPendingFailures] = useAtom(pendingFailuresAtom);
 
   const setIsDialogOpen = useSetAtom(isDialogOpenAtom);
+  const setIsAddMilestone = useSetAtom(isAddMilestoneAtom);
+  const setIsAddChallenge = useSetAtom(isAddChallengeAtom);
+  const setIsAddFailure = useSetAtom(isAddFailureAtom);
 
   const [form, fields] = useForm({
     id: "checkpoint",
@@ -71,9 +91,23 @@ export function Form() {
       const formData = new FormData(e.currentTarget);
 
       if (pendingMilestones.length > 0) {
-        pendingMilestones.forEach((milestone, index) => {
+        for (let [index, milestone] of pendingMilestones.entries()) {
+          console.log(milestone);
           formData.append(`milestones[${index}]`, JSON.stringify(milestone));
-        });
+        }
+      }
+
+      if (pendingChallenges.length > 0) {
+        console.log(pendingChallenges);
+        for (let [index, challenge] of pendingChallenges.entries()) {
+          formData.append(`challenges[${index}]`, JSON.stringify(challenge));
+        }
+      }
+
+      if (pendingFailures.length > 0) {
+        for (let [index, failure] of pendingFailures.entries()) {
+          formData.append(`failures[${index}]`, JSON.stringify(failure));
+        }
       }
 
       submit(formData, {
@@ -84,6 +118,12 @@ export function Form() {
       });
 
       setIsDialogOpen(false);
+      setIsAddChallenge(false);
+      setIsAddMilestone(false);
+      setIsAddFailure(false);
+      setPendingMilestones([]);
+      setPendingChallenges([]);
+      setPendingFailures([]);
     },
     shouldRevalidate: "onInput",
   });
@@ -176,54 +216,16 @@ export function Form() {
         </FormProvider>
       </section>
       <section className="mt-8">
-        <Tabs defaultValue="milestones">
-          <TabsList className="px-3 py-0 w-full justify-start items-end border border-l-0 border-r-0 border-t-0 border-b-neutral-grey-500 rounded-none">
-            {checkpointTabs.map(({ tab, colors }) => (
-              <TabsTrigger
-                key={tab}
-                value={tab}
-                className={`px-2 min-w-[140px] h-10 flex items-center gap-2 data-[state=active]:bg-transparent data-[state=active]:border-b-2 data-[state=active]:font-semibold capitalize ${colors}`}
-              >
-                <span className="block inherit">{tab}</span>
-                <small>{pendingMilestones.length}</small>
-              </TabsTrigger>
-            ))}
-          </TabsList>
-          {checkpointTabs.map(({ tab }) => (
-            <TabsContent
-              key={tab}
-              value={tab}
-              className="relative min-h-[240px] mt-4 px-3"
-            >
-              {tab === "milestones" ? (
-                <>
-                  {!!params.checkpoint ? null : (
-                    <Milestones initialValues={[]} />
-                  )}
-                </>
-              ) : null}
-            </TabsContent>
-          ))}
+        <Tabs>
+          {(tab) => (
+            <>
+              {tab === "milestones" ? <Milestones initialValues={[]} /> : null}
+              {tab === "challenges" ? <Challenges initialValues={[]} /> : null}
+              {tab === "failures" ? <Failures initialValues={[]} /> : null}
+            </>
+          )}
         </Tabs>
       </section>
     </>
   );
 }
-
-const checkpointTabs = [
-  {
-    tab: "milestones",
-    colors:
-      "data-[state=active]:text-green-700 data-[state=active]:border-green-700",
-  },
-  {
-    tab: "challenges",
-    colors:
-      "data-[state=active]:text-squash-700 data-[state=active]:border-squash-700",
-  },
-  {
-    tab: "failures",
-    colors:
-      "data-[state=active]:text-red-700 data-[state=active]:border-red-700",
-  },
-] as const;
