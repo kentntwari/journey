@@ -31,8 +31,18 @@ export const checkpointSchema = z.object({
       return val;
     }, milestoneSchema)
     .array(),
-  challenges: z.array(challengeSchema),
-  failures: z.array(failureSchema),
+  challenges: z
+    .preprocess((val) => {
+      if (typeof val === "string") return JSON.parse(val);
+      return val;
+    }, challengeSchema)
+    .array(),
+  failures: z
+    .preprocess((val) => {
+      if (typeof val === "string") return JSON.parse(val);
+      return val;
+    }, failureSchema)
+    .array(),
 });
 
 export const skimmedCheckpointSchema = checkpointSchema
