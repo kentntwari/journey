@@ -3,7 +3,7 @@
 @tailwind utilities;
 
 @layer components {
-  .form-wrapper-milestone {
+  .form-wrapper {
     @apply px-3 py-4 rounded-lg bg-white shadow-sm border border-neutral-grey-500;
   }
 
