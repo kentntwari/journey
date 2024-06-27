@@ -1,70 +1,50 @@
 import type { ActionFunctionArgs } from "@remix-run/node";
 
-import { useSetAtom, useAtomValue } from "jotai";
-import { FormProvider, useForm } from "@conform-to/react";
-import { getFormProps, getTextareaProps } from "@conform-to/react";
+import { useSetAtom } from "jotai";
 import { parseWithZod } from "@conform-to/zod";
+import { FormProvider } from "@conform-to/react";
+import { getFormProps, getTextareaProps } from "@conform-to/react";
 
-import { Form as RemixForm, useSearchParams } from "@remix-run/react";
+import { Form as RemixForm, json } from "@remix-run/react";
 
 import { Button } from "~/components/ui/button";
 import { Label } from "~/components/ui/label";
-
 import { TextAreaConform } from "~/components/conform/TextArea";
 
-import { challengeSchema } from "~/utils/schemas";
-import { pendingChallengesAtom, isAddChallengeAtom } from "~/utils/atoms";
+import { useChallengeForm } from "~/hooks/forms/useChallengeForm";
+
+import { createNewChallengeSchema } from "~/utils/schemas";
+import { isAddChallengeAtom } from "~/utils/atoms";
+
+import { createChallenge } from "./db.server";
 
 export async function action({ request, params }: ActionFunctionArgs) {
+  const formData = await request.formData();
+
+  const submission = parseWithZod(formData, {
+    schema: createNewChallengeSchema,
+  });
+
+  if (submission.status !== "success") {
+    return json(submission.reply());
+  }
+
+  await createChallenge(
+    submission.value.checkpointId,
+    submission.value.challenge
+  );
+
   return null;
 }
 
 export function Form() {
-  const setPendingChallenges = useSetAtom(pendingChallengesAtom);
-
-  const setIsAddChallenge = useSetAtom(isAddChallengeAtom);
-
-  const isAddChallenge = useAtomValue(isAddChallengeAtom);
-
-  const [searchParams] = useSearchParams();
-
-  const currentAction = searchParams.get("_action");
-
-  const [form, fields] = useForm({
-    id: "challenge",
-    onValidate({ formData }) {
-      return parseWithZod(formData, { schema: challengeSchema });
-    },
-    onSubmit(e) {
-      e.preventDefault();
-
-      const form = e.currentTarget;
-      const formData = new FormData(form);
-      const result = parseWithZod(formData, { schema: challengeSchema });
-
-      if (currentAction === "add") {
-        const id = String(formData.get("id"));
-        const description = String(formData.get("description"));
-
-        setPendingChallenges((prev) => [
-          ...prev,
-          {
-            id,
-            description,
-          },
-        ]);
-
-        isAddChallenge === true && setIsAddChallenge(false);
-      }
-    },
-
-    shouldValidate: "onBlur",
-  });
+  const [form, fields] = useChallengeForm({ shouldRevalidate: "onBlur" });
 
   return (
     <FormProvider context={form.context}>
       <RemixForm
         {...getFormProps(form)}
+        key={form.key}
         method="POST"
         className="grid grid-cols-2 gap-2"
         action="/ressource/form/challenge"
@@ -83,19 +63,30 @@ export function Form() {
           {<p>{fields.description.errors}</p>}
         </div>
         <div className="mt-4 row-start-4 col-span-2 flex items-center justify-end gap-3">
-          <Button
-            type="button"
-            size="sm"
-            variant="neutral"
-            className="w-[72px]"
-          >
-            Cancel
-          </Button>
+          <CloseChallengeFormBtn />
           <Button type="submit" size="sm" variant="primary">
             Create
           </Button>
         </div>
       </RemixForm>
     </FormProvider>
+  );
+}
+
+export function CloseChallengeFormBtn() {
+  const setIsAddChallenge = useSetAtom(isAddChallengeAtom);
+
+  return (
+    <>
+      <Button
+        type="button"
+        size="sm"
+        variant="neutral"
+        className="w-[72px]"
+        onClick={() => setIsAddChallenge(false)}
+      >
+        Cancel
+      </Button>
+    </>
   );
 }
