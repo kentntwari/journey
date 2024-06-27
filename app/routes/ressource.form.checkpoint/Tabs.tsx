@@ -1,12 +1,27 @@
+import { z } from "zod";
 import { useAtomValue } from "jotai";
 
+import { useSearchParams } from "@remix-run/react";
+
 import * as UITabs from "~/components/ui/tabs";
+
+import { useCurrentCheckpointDetails } from "~/hooks/useCurrentCheckpointDetails";
+
+import { Milestones } from "./Milestones";
+import { Challenges } from "./Challenges";
+import { Failures } from "./Failures";
 
 import {
   pendingMilestonesAtom,
   pendingChallengesAtom,
   pendingFailuresAtom,
 } from "~/utils/atoms";
+
+import {
+  milestoneSchema,
+  challengeSchema,
+  failureSchema,
+} from "~/utils/schemas";
 
 const checkpointTabs = [
   {
@@ -26,9 +41,20 @@ const checkpointTabs = [
   },
 ] as const;
 
-interface IUITabs {
+interface IUITabsWithInitialValues {
   defaultValue?: (typeof checkpointTabs)[number]["tab"];
   showTicker?: boolean;
+  initialValues: {
+    milestones: z.infer<typeof milestoneSchema>[];
+    challenges: z.infer<typeof challengeSchema>[];
+    failures: z.infer<typeof failureSchema>[];
+  };
+  children?: never;
+}
+interface IUITabsWithChildren {
+  defaultValue?: (typeof checkpointTabs)[number]["tab"];
+  showTicker?: boolean;
+  initialValues?: never;
   children: (
     currentTab: (typeof checkpointTabs)[number]["tab"]
   ) => React.ReactNode;
@@ -37,8 +63,9 @@ interface IUITabs {
 export function Tabs({
   defaultValue = "milestones",
   showTicker = true,
+  initialValues,
   children,
-}: IUITabs) {
+}: IUITabsWithInitialValues | IUITabsWithChildren) {
   return (
     <>
       <UITabs.Tabs defaultValue={defaultValue}>
@@ -60,29 +87,82 @@ export function Tabs({
             value={tab}
             className="relative min-h-[240px] mt-4 px-3"
           >
-            {children(tab)}
+            <>
+              {typeof initialValues !== "undefined" && (
+                <>
+                  {tab === "milestones" ? (
+                    <Milestones initialValues={initialValues.milestones} />
+                  ) : null}
+
+                  {tab === "challenges" ? (
+                    <Challenges initialValues={initialValues.challenges} />
+                  ) : null}
+
+                  {tab === "failures" ? (
+                    <Failures initialValues={initialValues.failures} />
+                  ) : null}
+                </>
+              )}
+
+              {typeof initialValues === "undefined" && children(tab)}
+            </>
           </UITabs.TabsContent>
         ))}
       </UITabs.Tabs>
-      ;
     </>
   );
 }
 
 function Ticker({ tab }: { tab: (typeof checkpointTabs)[number]["tab"] }) {
+  const initialValues = useCurrentCheckpointDetails();
+
+  const defaultmilestones = initialValues?.results
+    ? [...initialValues.results.milestones]
+    : [];
+
+  const defaultChallenges = initialValues?.results
+    ? [...initialValues.results.challenges]
+    : [];
+
+  const defaultFailures = initialValues?.results
+    ? [...initialValues.results.failures]
+    : [];
+
   const pendingMilestones = useAtomValue(pendingMilestonesAtom);
   const pendingChallenges = useAtomValue(pendingChallengesAtom);
   const pendingFailures = useAtomValue(pendingFailuresAtom);
 
+  const [searchParams] = useSearchParams();
+
+  const currentAction = searchParams.get("_action");
+
   switch (tab) {
     case "milestones":
-      return <small>{pendingMilestones.length}</small>;
+      return (
+        <small>
+          {currentAction === "add"
+            ? [...pendingMilestones].length
+            : [...pendingMilestones, ...defaultmilestones].length}
+        </small>
+      );
 
     case "challenges":
-      return <small>{pendingChallenges.length}</small>;
+      return (
+        <small>
+          {currentAction === "add"
+            ? [...pendingChallenges].length
+            : [...pendingChallenges, ...defaultChallenges].length}
+        </small>
+      );
 
     case "failures":
-      return <small>{pendingFailures.length}</small>;
+      return (
+        <small>
+          {currentAction === "add"
+            ? [...pendingFailures].length
+            : [...pendingFailures, ...defaultFailures].length}
+        </small>
+      );
 
     default:
       return null;
