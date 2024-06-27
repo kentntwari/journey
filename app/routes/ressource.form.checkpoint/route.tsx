@@ -1,10 +1,8 @@
 import type { ActionFunctionArgs } from "@remix-run/node";
 
-import { useAtomValue, useSetAtom, useAtom } from "jotai";
 import { parseWithZod } from "@conform-to/zod";
 import {
   FormProvider,
-  useForm,
   getFormProps,
   getTextareaProps,
   getInputProps,
@@ -12,13 +10,13 @@ import {
 import { Ellipsis, XIcon } from "lucide-react";
 
 import { redirect, json } from "@remix-run/node";
-import { useParams, useSubmit, Form as RemixForm } from "@remix-run/react";
+import { useParams, Form as RemixForm } from "@remix-run/react";
+
+import { useCheckpointForm } from "~/hooks/forms/useCheckpointForm";
+import { useHandleCloseModal } from "~/hooks/useHandleCloseModal";
 
 import * as db from "./db.server";
 import { Tabs } from "./Tabs";
-import { Milestones } from "./Milestones";
-import { Challenges } from "./Challenges";
-import { Failures } from "./Failures";
 import { StartDateConform } from "./StartDateConform";
 
 import { Input } from "~/components/ui/input";
@@ -27,15 +25,6 @@ import * as Dialog from "~/components/ui/dialog";
 import { Textarea } from "~/components/ui/textarea";
 
 import { checkpointSchema } from "~/utils/schemas";
-import {
-  pendingMilestonesAtom,
-  pendingChallengesAtom,
-  pendingFailuresAtom,
-  isDialogOpenAtom,
-  isAddChallengeAtom,
-  isAddMilestoneAtom,
-  isAddFailureAtom,
-} from "~/utils/atoms";
 
 export async function action({ request, params }: ActionFunctionArgs) {
   const formData = await request.formData();
@@ -64,69 +53,9 @@ export async function action({ request, params }: ActionFunctionArgs) {
 export function Form() {
   const params = useParams();
 
-  const submit = useSubmit();
+  const [form, fields] = useCheckpointForm({ shouldRevalidate: "onInput" });
 
-  const [pendingMilestones, setPendingMilestones] = useAtom(
-    pendingMilestonesAtom
-  );
-  const [pendingChallenges, setPendingChallenges] = useAtom(
-    pendingChallengesAtom
-  );
-
-  const [pendingFailures, setPendingFailures] = useAtom(pendingFailuresAtom);
-
-  const setIsDialogOpen = useSetAtom(isDialogOpenAtom);
-  const setIsAddMilestone = useSetAtom(isAddMilestoneAtom);
-  const setIsAddChallenge = useSetAtom(isAddChallengeAtom);
-  const setIsAddFailure = useSetAtom(isAddFailureAtom);
-
-  const [form, fields] = useForm({
-    id: "checkpoint",
-    onValidate({ formData }) {
-      return parseWithZod(formData, { schema: checkpointSchema });
-    },
-    onSubmit(e) {
-      e.preventDefault();
-
-      const formData = new FormData(e.currentTarget);
-
-      if (pendingMilestones.length > 0) {
-        for (let [index, milestone] of pendingMilestones.entries()) {
-          console.log(milestone);
-          formData.append(`milestones[${index}]`, JSON.stringify(milestone));
-        }
-      }
-
-      if (pendingChallenges.length > 0) {
-        console.log(pendingChallenges);
-        for (let [index, challenge] of pendingChallenges.entries()) {
-          formData.append(`challenges[${index}]`, JSON.stringify(challenge));
-        }
-      }
-
-      if (pendingFailures.length > 0) {
-        for (let [index, failure] of pendingFailures.entries()) {
-          formData.append(`failures[${index}]`, JSON.stringify(failure));
-        }
-      }
-
-      submit(formData, {
-        method: "post",
-        action: "/ressource/form/checkpoint",
-        fetcherKey: "checkpoint",
-        navigate: false,
-      });
-
-      setIsDialogOpen(false);
-      setIsAddChallenge(false);
-      setIsAddMilestone(false);
-      setIsAddFailure(false);
-      setPendingMilestones([]);
-      setPendingChallenges([]);
-      setPendingFailures([]);
-    },
-    shouldRevalidate: "onInput",
-  });
+  const { handleCloseModal } = useHandleCloseModal({ shouldNavigate: true });
 
   return (
     <>
@@ -134,6 +63,7 @@ export function Form() {
         <FormProvider context={form.context}>
           <RemixForm
             {...getFormProps(form)}
+            key={form.key}
             method="POST"
             action="/ressource/form/checkpoint"
             onSubmit={form.onSubmit}
@@ -153,9 +83,9 @@ export function Form() {
                 <button type="button">
                   <Ellipsis size={24} className="text-neutral-grey-1000" />
                 </button>
-                <Dialog.DialogClose>
+                <button type="button" onClick={handleCloseModal}>
                   <XIcon size={24} className="text-neutral-grey-1000" />
-                </Dialog.DialogClose>
+                </button>
               </div>
             </header>
 
@@ -216,15 +146,13 @@ export function Form() {
         </FormProvider>
       </section>
       <section className="mt-8">
-        <Tabs>
-          {(tab) => (
-            <>
-              {tab === "milestones" ? <Milestones initialValues={[]} /> : null}
-              {tab === "challenges" ? <Challenges initialValues={[]} /> : null}
-              {tab === "failures" ? <Failures initialValues={[]} /> : null}
-            </>
-          )}
-        </Tabs>
+        <Tabs
+          initialValues={{
+            milestones: [],
+            challenges: [],
+            failures: [],
+          }}
+        />
       </section>
     </>
   );

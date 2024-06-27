@@ -1,12 +1,11 @@
 import type { ActionFunctionArgs } from "@remix-run/node";
-import type { MileStoneEntry } from "~/types";
 
-import { useSetAtom, useAtomValue } from "jotai";
-import { FormProvider, useForm } from "@conform-to/react";
+import { FormProvider } from "@conform-to/react";
 import { getFormProps, getTextareaProps } from "@conform-to/react";
 import { parseWithZod } from "@conform-to/zod";
+import { useSetAtom } from "jotai";
 
-import { Form as RemixForm, useSearchParams } from "@remix-run/react";
+import { Form as RemixForm, json, useFetcher } from "@remix-run/react";
 
 import { Button } from "~/components/ui/button";
 import { Label } from "~/components/ui/label";
@@ -15,65 +14,44 @@ import { SelectConform } from "~/components/conform/Select";
 import { TextAreaConform } from "~/components/conform/TextArea";
 import { DatePickerConform } from "~/components/conform/DatePicker";
 
-import { milestoneSchema } from "~/utils/schemas";
-import { pendingMilestonesAtom, isAddMilestoneAtom } from "~/utils/atoms";
+import { useMilestoneForm } from "~/hooks/forms/useMilestoneForm";
+
+import { createNewMilestoneSchema } from "~/utils/schemas";
+import { isAddMilestoneAtom } from "~/utils/atoms";
+
+import { createMilestone } from "./db.server";
 
 export async function action({ request, params }: ActionFunctionArgs) {
+  const formData = await request.formData();
+
+  const submission = parseWithZod(formData, {
+    schema: createNewMilestoneSchema,
+  });
+
+  if (submission.status !== "success") {
+    return json(submission.reply());
+  }
+
+  await createMilestone(
+    submission.value.checkpointId,
+    submission.value.milestone
+  );
+
   return null;
 }
 
 export function Form() {
-  const setPendingMilestones = useSetAtom(pendingMilestonesAtom);
-
-  const setIsAddMilestone = useSetAtom(isAddMilestoneAtom);
-
-  const isAddMilestone = useAtomValue(isAddMilestoneAtom);
-
-  const [searchParams] = useSearchParams();
-
-  const currentAction = searchParams.get("_action");
-
-  const [form, fields] = useForm({
-    id: "milestone",
-    onValidate({ formData }) {
-      return parseWithZod(formData, { schema: milestoneSchema });
-    },
-    onSubmit(e) {
-      e.preventDefault();
-
-      const form = e.currentTarget;
-      const formData = new FormData(form);
-      const result = parseWithZod(formData, { schema: milestoneSchema });
-
-      if (currentAction === "add") {
-        const id = String(formData.get("id"));
-        const status = String(
-          formData.get("status")
-        ) as MileStoneEntry["status"];
-        const description = String(formData.get("description"));
-        const deadline = new Date(String(formData.get("deadline")));
-
-        setPendingMilestones((prev) => [
-          ...prev,
-          {
-            id,
-            status,
-            description,
-            deadline,
-          },
-        ]);
-
-        isAddMilestone === true && setIsAddMilestone(false);
-      }
-    },
-
-    shouldValidate: "onBlur",
+  const [form, fields] = useMilestoneForm({
+    shouldRevalidate: "onInput",
   });
+
+  const fetcher = useFetcher({ key: "create-new-milestone" });
 
   return (
     <FormProvider context={form.context}>
       <RemixForm
         {...getFormProps(form)}
+        key={form.key}
         method="POST"
         className="grid grid-cols-2 gap-2"
         action="/ressource/form/milestone"
@@ -108,19 +86,35 @@ export function Form() {
           {<p>{fields.description.errors}</p>}
         </div>
         <div className="mt-4 row-start-4 col-span-2 flex items-center justify-end gap-3">
+          <CloseMilestoneFormBtn />
           <Button
-            type="button"
+            type="submit"
             size="sm"
-            variant="neutral"
-            className="w-[72px]"
+            variant="primary"
+            disabled={fetcher.state !== "idle"}
           >
-            Cancel
-          </Button>
-          <Button type="submit" size="sm" variant="primary">
             Create
           </Button>
         </div>
       </RemixForm>
     </FormProvider>
+  );
+}
+
+function CloseMilestoneFormBtn() {
+  const setIsMilestoneFormOpen = useSetAtom(isAddMilestoneAtom);
+
+  return (
+    <>
+      <Button
+        type="button"
+        size="sm"
+        variant="neutral"
+        className="w-[72px]"
+        onClick={() => setIsMilestoneFormOpen(false)}
+      >
+        Cancel
+      </Button>
+    </>
   );
 }

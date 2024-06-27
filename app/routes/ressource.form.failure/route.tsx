@@ -1,70 +1,47 @@
 import type { ActionFunctionArgs } from "@remix-run/node";
 
-import { useSetAtom, useAtomValue } from "jotai";
-import { FormProvider, useForm } from "@conform-to/react";
-import { getFormProps, getTextareaProps } from "@conform-to/react";
+import { useSetAtom } from "jotai";
 import { parseWithZod } from "@conform-to/zod";
+import { FormProvider } from "@conform-to/react";
+import { getFormProps, getTextareaProps } from "@conform-to/react";
 
-import { Form as RemixForm, useSearchParams } from "@remix-run/react";
+import { Form as RemixForm, json } from "@remix-run/react";
 
 import { Button } from "~/components/ui/button";
 import { Label } from "~/components/ui/label";
-
 import { TextAreaConform } from "~/components/conform/TextArea";
 
-import { failureSchema } from "~/utils/schemas";
-import { pendingFailuresAtom, isAddFailureAtom } from "~/utils/atoms";
+import { useFailureForm } from "~/hooks/forms/useFailureForm";
+
+import { createNewFailureSchema } from "~/utils/schemas";
+import { isAddFailureAtom } from "~/utils/atoms";
+
+import { createFailure } from "./db.server";
 
 export async function action({ request, params }: ActionFunctionArgs) {
+  const formData = await request.formData();
+
+  const submission = parseWithZod(formData, {
+    schema: createNewFailureSchema,
+  });
+
+  if (submission.status !== "success") {
+    return json(submission.reply());
+  }
+
+  await createFailure(submission.value.checkpointId, submission.value.failure);
+
   return null;
 }
 
 export function Form() {
-  const setPendingFailures = useSetAtom(pendingFailuresAtom);
-
-  const setIsAddFailure = useSetAtom(isAddFailureAtom);
-
-  const isAddFailure = useAtomValue(isAddFailureAtom);
-
-  const [searchParams] = useSearchParams();
-
-  const currentAction = searchParams.get("_action");
-
-  const [form, fields] = useForm({
-    id: "failure",
-    onValidate({ formData }) {
-      return parseWithZod(formData, { schema: failureSchema });
-    },
-    onSubmit(e) {
-      e.preventDefault();
-
-      const form = e.currentTarget;
-      const formData = new FormData(form);
-      const result = parseWithZod(formData, { schema: failureSchema });
-
-      if (currentAction === "add") {
-        const id = String(formData.get("id"));
-        const description = String(formData.get("description"));
-
-        setPendingFailures((prev) => [
-          ...prev,
-          {
-            id,
-            description,
-          },
-        ]);
-
-        isAddFailure === true && setIsAddFailure(false);
-      }
-    },
-
-    shouldValidate: "onBlur",
-  });
+  const [form, fields] = useFailureForm({ shouldRevalidate: "onBlur" });
 
   return (
     <FormProvider context={form.context}>
       <RemixForm
         {...getFormProps(form)}
+        key={form.key}
         method="POST"
         className="grid grid-cols-2 gap-2"
         action="/ressource/form/failure"
@@ -83,19 +60,30 @@ export function Form() {
           {<p>{fields.description.errors}</p>}
         </div>
         <div className="mt-4 row-start-4 col-span-2 flex items-center justify-end gap-3">
-          <Button
-            type="button"
-            size="sm"
-            variant="neutral"
-            className="w-[72px]"
-          >
-            Cancel
-          </Button>
+          <CloseFailureFormBtn />
           <Button type="submit" size="sm" variant="primary">
             Create
           </Button>
         </div>
       </RemixForm>
     </FormProvider>
+  );
+}
+
+function CloseFailureFormBtn() {
+  const setIsFailureFormOpen = useSetAtom(isAddFailureAtom);
+
+  return (
+    <>
+      <Button
+        type="button"
+        size="sm"
+        variant="neutral"
+        className="w-[72px]"
+        onClick={() => setIsFailureFormOpen(false)}
+      >
+        Cancel
+      </Button>
+    </>
   );
 }
