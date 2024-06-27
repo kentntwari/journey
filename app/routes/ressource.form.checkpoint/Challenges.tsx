@@ -2,7 +2,7 @@ import type React from "react";
 
 import { z } from "zod";
 import { Plus } from "lucide-react";
-import { useAtomValue, useSetAtom } from "jotai";
+import { useAtom, useAtomValue, useSetAtom } from "jotai";
 
 import { useSearchParams } from "@remix-run/react";
 
@@ -23,10 +23,9 @@ Challenges.Form = Form;
 
 export function Challenges({ initialValues }: IchallengesProps) {
   const pendingChallenges = useAtomValue(pendingChallengesAtom);
-  const isAddChallenge = useAtomValue(isAddChallengeAtom);
+  const [isAddChallenge, setIsAddChallenge] = useAtom(isAddChallengeAtom);
 
   const [searchParams] = useSearchParams();
-
   const currentAction = searchParams.get("_action");
 
   if ([...pendingChallenges, ...initialValues].length === 0)
@@ -48,7 +47,7 @@ export function Challenges({ initialValues }: IchallengesProps) {
     );
 
   return (
-    <Popover.Popover>
+    <Popover.Popover open={isAddChallenge} onOpenChange={setIsAddChallenge}>
       <div className="space-y-4">
         <div className="w-full flex items-center justify-between">
           {currentAction === "add" && pendingChallenges.length > 0 ? (
@@ -71,7 +70,7 @@ export function Challenges({ initialValues }: IchallengesProps) {
         </div>
 
         <section className="space-y-3">
-          {pendingChallenges.map((challenge) => (
+          {[...pendingChallenges, ...initialValues].map((challenge) => (
             <article
               key={challenge.id}
               className={`px-4 py-3 bg-neutral-grey-200 border border-neutral-grey-600 capitalize font-medium text-sm text-neutral-grey-1000 space-y-2 rounded-lg`}
