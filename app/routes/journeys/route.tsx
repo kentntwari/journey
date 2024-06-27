@@ -34,7 +34,6 @@ export default function Journeys() {
   const { journeys, currentUser } = useTypedLoaderData<typeof loader>();
 
   const [searchParams] = useSearchParams();
-
   const currentAction = searchParams.get("_action");
 
   return (
