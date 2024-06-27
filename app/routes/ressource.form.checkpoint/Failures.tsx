@@ -2,7 +2,7 @@ import type React from "react";
 
 import { z } from "zod";
 import { Plus } from "lucide-react";
-import { useAtomValue, useSetAtom } from "jotai";
+import { useAtom, useAtomValue, useSetAtom } from "jotai";
 
 import { useSearchParams } from "@remix-run/react";
 
@@ -23,10 +23,9 @@ Failures.Form = Form;
 
 export function Failures({ initialValues }: IFailuresProps) {
   const pendingFailures = useAtomValue(pendingFailuresAtom);
-  const isAddFailure = useAtomValue(isAddFailureAtom);
+  const [isAddFailure, setIsAddFailure] = useAtom(isAddFailureAtom);
 
   const [searchParams] = useSearchParams();
-
   const currentAction = searchParams.get("_action");
 
   if ([...pendingFailures, ...initialValues].length === 0)
@@ -48,7 +47,7 @@ export function Failures({ initialValues }: IFailuresProps) {
     );
 
   return (
-    <Popover.Popover>
+    <Popover.Popover open={isAddFailure} onOpenChange={setIsAddFailure}>
       <div className="space-y-4">
         <div className="w-full flex items-center justify-between">
           {currentAction === "add" && pendingFailures.length > 0 ? (
@@ -70,7 +69,7 @@ export function Failures({ initialValues }: IFailuresProps) {
         </div>
 
         <section className="space-y-3">
-          {pendingFailures.map((failure) => (
+          {[...pendingFailures, ...initialValues].map((failure) => (
             <article
               key={failure.id}
               className={`px-4 py-3 bg-neutral-grey-200 border border-neutral-grey-600 capitalize font-medium text-sm text-neutral-grey-1000 space-y-2 rounded-lg`}
