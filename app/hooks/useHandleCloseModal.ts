@@ -7,7 +7,13 @@ import { useHydrated } from "remix-utils/use-hydrated";
 
 import { isDialogOpenAtom } from "~/utils/atoms";
 
-export function useHandleCloseModal() {
+interface IHandleCloseModalArgs {
+  shouldNavigate?: boolean;
+}
+
+export function useHandleCloseModal({
+  shouldNavigate = false,
+}: IHandleCloseModalArgs = {}): { handleCloseModal: () => void } {
   const params = useParams();
 
   const hydrated = useHydrated();
@@ -23,7 +29,7 @@ export function useHandleCloseModal() {
 
     if (hydrated) {
       setCloseModal(false);
-      navigate("/journeys/" + params.title);
+      if (shouldNavigate) navigate("/journeys/" + params.title);
     }
   }, []);
 
