@@ -2,7 +2,7 @@ import type React from "react";
 
 import { z } from "zod";
 import { Plus } from "lucide-react";
-import { useAtomValue, useSetAtom } from "jotai";
+import { useAtom, useAtomValue, useSetAtom } from "jotai";
 
 import { Fragment } from "react";
 
@@ -29,11 +29,11 @@ interface ISingleMilestoneProps extends React.ComponentProps<"article"> {
 Milestones.Form = Form;
 
 export function Milestones({ initialValues }: IMilestonesProps) {
+  const [isAddMilestone, setIsAddMilestone] = useAtom(isAddMilestoneAtom);
+
   const pendingMilestones = useAtomValue(pendingMilestonesAtom);
-  const isAddMilestone = useAtomValue(isAddMilestoneAtom);
 
   const [searchParams] = useSearchParams();
-
   const currentAction = searchParams.get("_action");
 
   if ([...pendingMilestones, ...initialValues].length === 0)
@@ -55,7 +55,7 @@ export function Milestones({ initialValues }: IMilestonesProps) {
     );
 
   return (
-    <Popover.Popover>
+    <Popover.Popover open={isAddMilestone} onOpenChange={setIsAddMilestone}>
       <div className="space-y-4">
         <div className="w-full flex items-center justify-between">
           {currentAction === "add" && pendingMilestones.length > 0 ? (
@@ -65,7 +65,7 @@ export function Milestones({ initialValues }: IMilestonesProps) {
               added
             </p>
           ) : null}
-          <Popover.PopoverTrigger asChild>
+          <Popover.PopoverTrigger>
             <Button type="button" variant="neutral" size="md">
               <Plus /> <span className="inherit">Add milestone</span>
             </Button>
@@ -78,7 +78,7 @@ export function Milestones({ initialValues }: IMilestonesProps) {
         </div>
 
         <section className="space-y-3">
-          {pendingMilestones.map((milestone) => (
+          {[...pendingMilestones, ...initialValues].map((milestone) => (
             <Fragment key={milestone.id}>
               <SingleMilestone
                 status={milestone.status}
