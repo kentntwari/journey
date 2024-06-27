@@ -1,19 +1,20 @@
 import type { ActionFunctionArgs } from "@remix-run/node";
 
 import { parseWithZod } from "@conform-to/zod";
-import { useForm, getFormProps, getTextareaProps } from "@conform-to/react";
+import { getFormProps, getTextareaProps } from "@conform-to/react";
 
 import { useRef } from "react";
 
 import {
   useNavigate,
-  useSubmit,
   useActionData,
   useFetchers,
   json,
   redirect,
   Form as RemixForm,
 } from "@remix-run/react";
+
+import { useJourneyForm } from "~/hooks/forms/useJourneyForm";
 
 import { Button } from "~/components/ui/button";
 import { Textarea } from "~/components/ui/textarea";
@@ -26,7 +27,6 @@ import { newJourneyschema } from "~/utils/schemas";
 
 export async function action({ request }: ActionFunctionArgs) {
   const { user: currentUser } = await verifyUser(request);
-
   if (!currentUser) throw redirectIfNotAuthenticated();
 
   const formData = await request.formData();
@@ -65,37 +65,17 @@ export function Form() {
     .filter(Boolean)
     .find((f) => f.state === "submitting");
 
-  const submit = useSubmit();
-
   const lastResult = useActionData<typeof action>();
 
-  const [form, fields] = useForm({
-    // // Sync the result of last submission
-    lastResult,
-
-    // Reuse the validation logic on the client
-    onValidate({ formData }) {
-      return parseWithZod(formData, { schema: newJourneyschema });
-    },
-    onSubmit(event) {
-      event.preventDefault();
-
-      const formData = new FormData(event.currentTarget);
-
-      submit(formData, {
-        method: "POST",
-        action: "/ressource/form/journey",
-        fetcherKey: "new-journey",
-        navigate: false,
-      });
-    },
-
+  const [form, fields] = useJourneyForm({
     shouldRevalidate: "onInput",
+    lastResult,
   });
 
   return (
     <RemixForm
       method="POST"
+      key={form.key}
       action="/ressource/form/journey"
       className="w-full"
       {...getFormProps(form)}
