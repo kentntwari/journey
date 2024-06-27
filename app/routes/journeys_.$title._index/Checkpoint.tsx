@@ -12,16 +12,18 @@ import { useTypedRouteLoaderData, TypedAwait } from "remix-typedjson";
 
 import { useHandleCloseModal } from "~/hooks/useHandleCloseModal";
 import { useCurrentCheckpointDetails } from "~/hooks/useCurrentCheckpointDetails";
+import { useResetCheckpointRelatedAtoms } from "~/hooks/useResetCheckpointRelatedAtoms";
 
 import { Form } from "~/routes/ressource.form.checkpoint/route";
+import { Tabs } from "~/routes/ressource.form.checkpoint/Tabs";
 
 import * as Skeletons from "./Skeletons";
 
 import { cn } from "~/utils/cn";
-import { skimmedCheckpointSchema } from "~/utils/schemas";
+import { skimmedCheckpointSchema, milestoneSchema } from "~/utils/schemas";
 
 import { getJourneyCheckpoints } from "./db.server";
-import { generateCheckpointId, getCurrentPosition } from "./load";
+import { generateCheckpointId, getCurrentPosition } from "./generate";
 
 const metrics = [
   {
@@ -113,7 +115,7 @@ function Snippet({ data, isLast, className, children }: ICheckPointsProps) {
 function Header() {
   const navigation = useNavigation();
 
-  const { handleCloseModal } = useHandleCloseModal();
+  const { handleCloseModal } = useHandleCloseModal({ shouldNavigate: true });
 
   const deferredCheckpoints = useTypedRouteLoaderData<typeof loader>(
     "routes/journeys_.$title._index"
@@ -170,6 +172,8 @@ function LoadPosition({ checkpoints }: ILoadPositionProps) {
 
   const data = useCurrentCheckpointDetails();
 
+  const { resetAtoms } = useResetCheckpointRelatedAtoms();
+
   function loadCheckpoint(id: string) {
     submit(null, {
       action: "/ressource/checkpoint/" + id,
@@ -201,6 +205,7 @@ function LoadPosition({ checkpoints }: ILoadPositionProps) {
           disabled={disableLoading()}
           onClick={() => {
             if (id?.prev) loadCheckpoint(id.prev);
+            resetAtoms();
           }}
         >
           <ChevronLeft size={20} className="text-neutral-grey-1000" />
@@ -210,6 +215,7 @@ function LoadPosition({ checkpoints }: ILoadPositionProps) {
           disabled={disableLoading()}
           onClick={() => {
             if (id?.next) loadCheckpoint(id.next);
+            resetAtoms();
           }}
         >
           <ChevronRight size={20} className="text-neutral-grey-1000" />
@@ -252,6 +258,18 @@ function Body() {
           </span>
           <p className="text-sm">{data.results.description}</p>
         </div>
+
+        <footer className="mt-8">
+          <Tabs
+            initialValues={{
+              milestones: data.results.milestones as z.infer<
+                typeof milestoneSchema
+              >[],
+              challenges: data.results.challenges,
+              failures: data.results.failures,
+            }}
+          />
+        </footer>
       </>
     );
 }
