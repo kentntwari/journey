@@ -10,14 +10,53 @@ export const milestoneSchema = z.object({
   description: z.string().min(1).max(100),
 });
 
+export const createNewMilestoneSchema = z.object({
+  checkpointId: z.string(),
+  milestone: z.preprocess((val) => {
+    if (typeof val === "string") {
+      try {
+        return JSON.parse(val);
+      } catch (error) {
+        return val;
+      }
+    }
+  }, milestoneSchema),
+});
+
 export const challengeSchema = z.object({
   id: z.string(),
   description: z.string().min(1).max(100),
 });
 
+export const createNewChallengeSchema = z.object({
+  checkpointId: z.string(),
+  challenge: z.preprocess((val) => {
+    if (typeof val === "string") {
+      try {
+        return JSON.parse(val);
+      } catch (error) {
+        return val;
+      }
+    }
+  }, challengeSchema),
+});
+
 export const failureSchema = z.object({
   id: z.string(),
   description: z.string().min(1).max(100),
+});
+
+export const createNewFailureSchema = z.object({
+  checkpointId: z.string(),
+  failure: z.preprocess((val) => {
+    if (typeof val === "string") {
+      try {
+        return JSON.parse(val);
+      } catch (error) {
+        return val;
+      }
+    }
+  }, failureSchema),
 });
 
 export const checkpointSchema = z.object({
