@@ -29,7 +29,6 @@ export async function loader({ params, request }: LoaderFunctionArgs) {
   throw redirect("/journeys");
 }
 
-
 export default function Journey() {
   const params = useParams();
 
@@ -57,7 +56,7 @@ export default function Journey() {
           <TypedAwait resolve={checkpoints} errorElement={<p>Error</p>}>
             {(checkpoints) => (
               <JotaiScopedProvider atoms={[isDialogOpenAtom]}>
-                <Modal>
+                <Modal shouldResetCheckpointRelatedAtoms>
                   {checkpoints.length === 0 ? (
                     <div className="w-full h-full flex items-center justify-center">
                       <div className="w-[280px] space-y-4">
