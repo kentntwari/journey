@@ -7,6 +7,7 @@ import { useMemo } from "react";
 import { useNavigation, useSearchParams } from "@remix-run/react";
 
 import { useHandleCloseModal } from "~/hooks/useHandleCloseModal";
+import { useResetCheckpointRelatedAtoms } from "~/hooks/useResetCheckpointRelatedAtoms";
 
 import { Checkpoint } from "./Checkpoint";
 
@@ -16,7 +17,12 @@ import { Button } from "~/components/ui/button";
 import { cn } from "~/utils/cn";
 import { isDialogOpenAtom } from "~/utils/atoms";
 
-interface ToggleModalBtnProps
+interface IModalProps {
+  children: React.ReactNode;
+  shouldResetCheckpointRelatedAtoms?: boolean;
+}
+
+interface IToggleModalBtnProps
   extends Omit<React.ComponentProps<typeof Button>, "type"> {
   children?: React.ReactNode;
   executeFn?: () => void;
@@ -24,14 +30,18 @@ interface ToggleModalBtnProps
 
 Modal.ToggleBtn = ToggleModalBtn;
 
-export function Modal({ children }: { children: React.ReactNode }) {
+export function Modal({
+  children,
+  shouldResetCheckpointRelatedAtoms = false,
+}: IModalProps) {
   const [open, setOpen] = useAtom(isDialogOpenAtom);
 
   const [searchParams] = useSearchParams();
-
-  const { handleCloseModal } = useHandleCloseModal();
-
   const action = searchParams.get("_action");
+
+  const { handleCloseModal } = useHandleCloseModal({ shouldNavigate: true });
+
+  const { resetAtoms } = useResetCheckpointRelatedAtoms();
 
   const memoizedChildren = useMemo(() => {
     if (!action)
@@ -69,7 +79,10 @@ export function Modal({ children }: { children: React.ReactNode }) {
         <Dialog.DialogOverlay className="bg-black/60">
           <Dialog.DialogContent
             className="inset-0 top-32 translate-x-0 translate-y-0 py-4 px-0 bg-neutral-grey-200 rounded-t-lg overflow-auto"
-            onInteractOutside={handleCloseModal}
+            onInteractOutside={() => {
+              handleCloseModal();
+              if (shouldResetCheckpointRelatedAtoms) resetAtoms();
+            }}
           >
             {memoizedChildren}
           </Dialog.DialogContent>
@@ -86,7 +99,7 @@ export function ToggleModalBtn({
   children,
   executeFn,
   ...props
-}: ToggleModalBtnProps) {
+}: IToggleModalBtnProps) {
   const open = useAtomValue(isDialogOpenAtom);
   const setOpen = useSetAtom(isDialogOpenAtom);
 
