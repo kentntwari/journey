@@ -99,6 +99,19 @@ export const skimmedCheckpointSchema = checkpointSchema
     failures: z.number(),
   });
 
+export const checkpointTitleSchema = checkpointSchema.pick({ title: true });
+export const checkpointDescriptionSchema = checkpointSchema.pick({
+  description: true,
+});
+export const checkpointStartDateSchema = checkpointSchema.pick({
+  startDate: true,
+});
+
+export const deleteCheckpointSchema = z.object({
+  id: z.string(),
+  journeyTitle: z.string(),
+});
+
 export const journeySchema = z.object({
   id: z.string(),
   title: z.string(),
