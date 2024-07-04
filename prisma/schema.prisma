@@ -23,7 +23,7 @@ model User {
 
 model Journey {
   id    String @id @default(cuid())
-  title String
+  title String @unique
 
   checkpoints Checkpoint[]
   User        User?        @relation(fields: [userId], references: [id], onDelete: Cascade, onUpdate: Cascade)
