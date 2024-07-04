@@ -6,7 +6,7 @@ import { useSearchParams, Form } from "@remix-run/react";
 import { typedjson, useTypedLoaderData } from "remix-typedjson";
 
 import { Button } from "~/components/ui/button";
-import { Form as CreateNewJourney } from "../ressource.form.journey/route";
+import { Form as CreateNewJourney } from "../ressource.form.journey/Form";
 
 import { Journey } from "./Journey";
 
@@ -15,7 +15,6 @@ import * as db from "./db.server";
 
 export async function loader({ request }: LoaderFunctionArgs) {
   const { user } = await verifyUser(request);
-
   if (!user) throw redirectIfNotAuthenticated();
 
   const data = await db.getUserJourneys(user.email);
