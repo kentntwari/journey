@@ -1,6 +1,7 @@
 import type * as React from "react";
 
 import { useAtom, useSetAtom, useAtomValue } from "jotai";
+import { VisuallyHidden } from "@radix-ui/react-visually-hidden";
 
 import { useMemo } from "react";
 
@@ -22,13 +23,26 @@ interface IModalProps {
   shouldResetCheckpointRelatedAtoms?: boolean;
 }
 
-interface IToggleModalBtnProps
+interface IForceOpenBtnProps
   extends Omit<React.ComponentProps<typeof Button>, "type"> {
   children?: React.ReactNode;
   executeFn?: () => void;
 }
 
-Modal.ToggleBtn = ToggleModalBtn;
+Modal.ForceOpenBtn = ForceOpenBtn;
+
+Modal.Close = Dialog.DialogClose;
+
+const NEW_CHECKPOINT_FORM_MODAL_BODY = <Checkpoint.Form />;
+
+const CHECKPOINT_MODAL_BODY = (
+  <div className="px-3">
+    <Checkpoint.DetailsHeader />
+    <section className="relative mt-8 min-h-[300px]">
+      <Checkpoint.DetailsBody />
+    </section>
+  </div>
+);
 
 export function Modal({
   children,
@@ -54,17 +68,14 @@ export function Modal({
 
     switch (action) {
       case "add":
-        return <Checkpoint.Form />;
+        return NEW_CHECKPOINT_FORM_MODAL_BODY;
 
       case "read":
-        return (
-          <div className="px-3">
-            <Checkpoint.DetailsHeader />
-            <section className="relative mt-8 min-h-[300px]">
-              <Checkpoint.DetailsBody />
-            </section>
-          </div>
-        );
+        return CHECKPOINT_MODAL_BODY;
+
+      // deepcode ignore DuplicateCaseBody: delete does not change modal body
+      case "delete":
+        return CHECKPOINT_MODAL_BODY;
 
       default:
         return "Not found";
@@ -84,6 +95,13 @@ export function Modal({
               if (shouldResetCheckpointRelatedAtoms) resetAtoms();
             }}
           >
+            <VisuallyHidden asChild>
+              <Dialog.DialogTitle />
+            </VisuallyHidden>
+
+            <VisuallyHidden asChild>
+              <Dialog.DialogDescription />
+            </VisuallyHidden>
             {memoizedChildren}
           </Dialog.DialogContent>
         </Dialog.DialogOverlay>
@@ -92,14 +110,14 @@ export function Modal({
   );
 }
 
-export function ToggleModalBtn({
+export function ForceOpenBtn({
   name,
   value,
   className,
   children,
   executeFn,
   ...props
-}: IToggleModalBtnProps) {
+}: IForceOpenBtnProps) {
   const open = useAtomValue(isDialogOpenAtom);
   const setOpen = useSetAtom(isDialogOpenAtom);
 

@@ -4,7 +4,12 @@ import { Suspense, Fragment } from "react";
 import { Ellipsis, ListFilter } from "lucide-react";
 import { ScopeProvider as JotaiScopedProvider } from "jotai-scope";
 
-import { useParams, redirect, useSubmit } from "@remix-run/react";
+import {
+  useParams,
+  redirect,
+  useSubmit,
+  ClientLoaderFunctionArgs,
+} from "@remix-run/react";
 import { useTypedLoaderData, TypedAwait, typeddefer } from "remix-typedjson";
 
 import * as db from "./db.server";
@@ -20,7 +25,6 @@ import { isDialogOpenAtom } from "~/utils/atoms";
 export async function loader({ params, request }: LoaderFunctionArgs) {
   if (params.title) {
     const { user } = await verifyUser(request);
-
     if (!user) throw redirectIfNotAuthenticated(params.title);
 
     return typeddefer({ checkpoints: db.getJourneyCheckpoints(params.title) });
@@ -64,14 +68,14 @@ export default function Journey() {
                           No checkpoints yet
                         </span>
 
-                        <Modal.ToggleBtn
+                        <Modal.ForceOpenBtn
                           size="md"
                           variant="primary"
                           name="_action"
                           value="add"
                         >
                           Add checkpoint
-                        </Modal.ToggleBtn>
+                        </Modal.ForceOpenBtn>
                       </div>
                     </div>
                   ) : null}
@@ -96,14 +100,14 @@ export default function Journey() {
                             <ListFilter size="20" />
                           </Button>
 
-                          <Modal.ToggleBtn
+                          <Modal.ForceOpenBtn
                             size="xs"
                             variant="primary"
                             name="_action"
                             value="add"
                           >
                             Add checkpoint
-                          </Modal.ToggleBtn>
+                          </Modal.ForceOpenBtn>
                         </div>
                       </div>
                       <ul className="p-0 m-0 mt-7">
@@ -121,7 +125,7 @@ export default function Journey() {
                               isLast={checkpoint === arr.at(-1) ? true : false}
                               className="relative"
                             >
-                              <Modal.ToggleBtn
+                              <Modal.ForceOpenBtn
                                 name="_action"
                                 value="read"
                                 variant="neutral"
@@ -136,7 +140,7 @@ export default function Journey() {
                                     navigate: false,
                                   });
                                 }}
-                              ></Modal.ToggleBtn>
+                              ></Modal.ForceOpenBtn>
                             </Checkpoint.Snippet>
                           </Fragment>
                         ))}

@@ -8,7 +8,7 @@ import { Fragment } from "react";
 
 import { useSearchParams } from "@remix-run/react";
 
-import { Form } from "~/routes/ressource.form.milestone/route";
+import { Form } from "~/routes/ressource.form.milestone/Form";
 
 import { Button } from "~/components/ui/button";
 import * as Popover from "~/components/ui/popover";
@@ -65,7 +65,7 @@ export function Milestones({ initialValues }: IMilestonesProps) {
               added
             </p>
           ) : null}
-          <Popover.PopoverTrigger>
+          <Popover.PopoverTrigger asChild>
             <Button type="button" variant="neutral" size="md">
               <Plus /> <span className="inherit">Add milestone</span>
             </Button>

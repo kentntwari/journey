@@ -6,7 +6,7 @@ import { useAtom, useAtomValue, useSetAtom } from "jotai";
 
 import { useSearchParams } from "@remix-run/react";
 
-import { Form } from "~/routes/ressource.form.failure/route";
+import { Form } from "~/routes/ressource.form.failure/Form";
 
 import { Button } from "~/components/ui/button";
 import * as Popover from "~/components/ui/popover";
