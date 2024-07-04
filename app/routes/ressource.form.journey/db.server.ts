@@ -27,7 +27,7 @@ export async function createUserJourney(
         lastName: user.lastName,
         journeys: {
           create: {
-            title,
+            title: title.trim(),
           },
         },
       },
@@ -44,7 +44,7 @@ export async function createUserJourney(
     data: {
       journeys: {
         create: {
-          title,
+          title: title.trim(),
         },
       },
     },
