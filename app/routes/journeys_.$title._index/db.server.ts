@@ -4,7 +4,10 @@ export async function getJourneyCheckpoints(journeyTitle: string) {
   try {
     const currentJourneyID = await prisma.journey.findFirst({
       where: {
-        title: journeyTitle,
+        title: {
+          equals: journeyTitle,
+          mode: "insensitive",
+        },
       },
       select: {
         id: true,
