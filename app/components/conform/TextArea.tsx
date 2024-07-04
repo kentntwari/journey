@@ -8,5 +8,5 @@ export function TextAreaConform({
 }: {
   meta: FieldMetadata<string>;
 } & ComponentProps<typeof Textarea>) {
-  return <Textarea {...getTextareaProps(meta)} {...props} />;
+  return <Textarea {...getTextareaProps(meta)} {...props} key={props.key} />;
 }
