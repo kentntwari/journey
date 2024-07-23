@@ -1,6 +1,7 @@
 import type React from "react";
 
 import { z } from "zod";
+import { nanoid } from "nanoid";
 import { Plus } from "lucide-react";
 import { useAtom, useAtomValue, useSetAtom } from "jotai";
 
@@ -79,7 +80,7 @@ export function Milestones({ initialValues }: IMilestonesProps) {
 
         <section className="space-y-3">
           {[...pendingMilestones, ...initialValues].map((milestone) => (
-            <Fragment key={milestone.id}>
+            <Fragment key={nanoid()}>
               <SingleMilestone
                 status={milestone.status}
                 description={milestone.description}

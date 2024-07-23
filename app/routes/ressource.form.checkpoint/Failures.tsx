@@ -1,6 +1,7 @@
 import type React from "react";
 
 import { z } from "zod";
+import { nanoid } from "nanoid";
 import { Plus } from "lucide-react";
 import { useAtom, useAtomValue, useSetAtom } from "jotai";
 
@@ -71,7 +72,7 @@ export function Failures({ initialValues }: IFailuresProps) {
         <section className="space-y-3">
           {[...pendingFailures, ...initialValues].map((failure) => (
             <article
-              key={failure.id}
+              key={nanoid()}
               className={`px-4 py-3 bg-neutral-grey-200 border border-neutral-grey-600 capitalize font-medium text-sm text-neutral-grey-1000 space-y-2 rounded-lg`}
             >
               {failure.description}
