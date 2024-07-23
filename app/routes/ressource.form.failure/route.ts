@@ -19,7 +19,10 @@ export async function action({ request, params }: ActionFunctionArgs) {
     return json(submission.reply());
   }
 
-  await createFailure(submission.value.checkpointId, submission.value.failure);
+  await createFailure(
+    submission.value.checkpointSlug,
+    submission.value.failure
+  );
 
   return null;
 }

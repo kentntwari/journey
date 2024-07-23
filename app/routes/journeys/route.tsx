@@ -60,9 +60,6 @@ export default function Journeys() {
             found
           </span>
           <div className="space-x-2">
-            <Button variant="neutral" size="xs">
-              Filters
-            </Button>
             <Form className="inline">
               <Button
                 variant="primary"
@@ -82,7 +79,7 @@ export default function Journeys() {
       {journeys.length > 0 ? (
         <>
           {journeys.map((journey) => (
-            <Fragment key={journey.id}>
+            <Fragment key={journey.slug}>
               <Journey data={journey} />
             </Fragment>
           ))}
@@ -93,5 +90,5 @@ export default function Journeys() {
 }
 
 export function ErrorBoundary() {
-  return <p>Error</p>;
+  return <p>ErrorxaXAx</p>;
 }

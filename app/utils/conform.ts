@@ -1,5 +1,6 @@
 import type { MileStoneEntry, ChallengeEntry, FailureEntry } from "~/types";
 import type { SubmitFunction } from "@remix-run/react";
+import { i } from "node_modules/vite/dist/node/types.d-aGj9QkWt";
 
 const targets = ["milestone", "challenge", "failure", "main"] as const;
 
@@ -32,19 +33,27 @@ export function extractCKData(
   target: (typeof targets)[number]
 ) {
   if (target === "challenge" || target === "failure") {
-    const id = String(formData.get("id"));
+    const slug = formData.get("slug")
+      ? String(formData.get("slug"))
+      : undefined;
     const description = String(formData.get("description"));
 
-    return { id, description };
+    if (typeof slug !== "undefined") return { slug, description };
+    return { description };
   }
 
   if (target === "milestone") {
-    const id = String(formData.get("id"));
+    const slug = formData.get("slug")
+      ? String(formData.get("slug"))
+      : undefined;
     const status = String(formData.get("status")) as MileStoneEntry["status"];
     const description = String(formData.get("description"));
     const deadline = new Date(String(formData.get("deadline")));
 
-    return { id, status, description, deadline };
+    if (typeof slug !== "undefined")
+      return { slug, status, description, deadline };
+
+    return { status, description, deadline };
   }
 
   if (target === "main") {
@@ -63,14 +72,14 @@ export function extractCKData(
 }
 
 export function submitCKUpdates(
-  checkpointId: string,
+  checkpointSlug: string,
   formData: FormData,
   submit: SubmitFunction,
   target: (typeof targets)[number],
   intent?: string
 ) {
   const outgoingFormData = new FormData();
-  outgoingFormData.append("id", checkpointId);
+  outgoingFormData.append("slug", checkpointSlug);
 
   switch (target) {
     case "milestone":
@@ -150,7 +159,7 @@ export function submitCKUpdates(
         });
       }
 
-      if (intent === "update-start-date" && typeof startDate !== "undefined") {
+      if (intent === "update-startDate" && typeof startDate !== "undefined") {
         outgoingFormData.append("startDate", startDate.toISOString());
         outgoingFormData.append("intent", intent);
 
@@ -169,9 +178,9 @@ export function submitCKUpdates(
 }
 export function submitNewCK(
   formData: FormData,
-  pendingMilestones: MileStoneEntry[] = [],
-  pendingChallenges: ChallengeEntry[] = [],
-  pendingFailures: FailureEntry[] = [],
+  pendingMilestones: Omit<MileStoneEntry, "slug">[] = [],
+  pendingChallenges: Pick<ChallengeEntry, "description">[] = [],
+  pendingFailures: Pick<FailureEntry, "description">[] = [],
   submit: SubmitFunction
 ) {
   if (pendingMilestones.length > 0) {
@@ -202,14 +211,14 @@ export function submitNewCK(
 }
 
 export function deleteCK(
-  checkpointId: string,
-  journeyTitle: string,
+  checkpointSlug: string,
+  journeySlug: string,
   submit: SubmitFunction
 ) {
   const formData = new FormData();
-  formData.append("id", checkpointId);
+  formData.append("slug", checkpointSlug);
   formData.append("intent", "delete");
-  formData.append("journeyTitle", journeyTitle);
+  formData.append("journeySlug", journeySlug);
 
   submit(formData, {
     method: "DELETE",

@@ -10,12 +10,9 @@ export function useCKFailures() {
   const setIsAddFailure = useSetAtom(isAddFailureAtom);
 
   function set(formData: FormData) {
-    const { id, description } = extractCKData(
-      formData,
-      "failure"
-    ) as ChallengeEntry;
+    const { description } = extractCKData(formData, "failure");
 
-    setPendingFailures((prev) => [...prev, { id, description }]);
+    setPendingFailures((prev) => [...prev, { description }]);
     setIsAddFailure(false);
   }
 

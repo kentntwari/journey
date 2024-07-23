@@ -1,5 +1,10 @@
 import { parseWithZod } from "@conform-to/zod";
-import { useForm, getFormProps, getTextareaProps } from "@conform-to/react";
+import {
+  useForm,
+  getFormProps,
+  getTextareaProps,
+  FormProvider,
+} from "@conform-to/react";
 
 import { useRef } from "react";
 
@@ -46,54 +51,58 @@ export function Form() {
         fetcherKey: "new-journey",
         navigate: false,
       });
+
+      form.reset();
     },
 
     shouldRevalidate: "onInput",
   });
 
   return (
-    <RemixForm
-      method="POST"
-      key={form.key}
-      action="/ressource/form/journey"
-      className="w-full"
-      {...getFormProps(form)}
-      onSubmit={form.onSubmit}
-    >
-      <div className="w-full h-44 p-4 flex flex-col justify-between items-end bg-blue-200 border border-blue-900 rounded-lg">
-        <div className="w-full space-y-1">
-          <Textarea
-            {...getTextareaProps(fields.title)}
-            key={fields.title.key}
-            ref={textInputRef}
-            maxLength={100}
-            placeholder="Write title here..."
-            className="w-full h-[72px] pl-3 pr-2 pt-2 bg-transparent border border-neutral-grey-500 rounded-lg resize-none"
-          />
-          <small className="block text-2xs text-global-neutral-grey-900">
-            Must be less than 500 words
-          </small>
-        </div>
+    <FormProvider context={form.context}>
+      <RemixForm
+        {...getFormProps(form)}
+        method="POST"
+        key={form.key}
+        action="/ressource/form/journey"
+        className="w-full"
+        onSubmit={form.onSubmit}
+      >
+        <div className="w-full h-44 p-4 flex flex-col justify-between items-end bg-blue-200 border border-blue-900 rounded-lg">
+          <div className="w-full space-y-1">
+            <Textarea
+              {...getTextareaProps(fields.title)}
+              key={fields.title.key}
+              ref={textInputRef}
+              maxLength={100}
+              placeholder="Write title here..."
+              className="w-full h-[72px] pl-3 pr-2 pt-2 bg-transparent border border-neutral-grey-500 rounded-lg resize-none"
+            />
+            <small className="block text-2xs text-global-neutral-grey-900">
+              Must be less than 500 words
+            </small>
+          </div>
 
-        <div className="flex items-center gap-1">
-          <Button
-            type="button"
-            variant="neutral"
-            size="2xs"
-            onClick={() => navigate("/journeys")}
-          >
-            Cancel
-          </Button>
-          <Button
-            type="submit"
-            variant="primary"
-            size="2xs"
-            disabled={fetcherInFlight ? true : false}
-          >
-            Save
-          </Button>
+          <div className="flex items-center gap-1">
+            <Button
+              type="button"
+              variant="neutral"
+              size="2xs"
+              onClick={() => navigate("/journeys")}
+            >
+              Cancel
+            </Button>
+            <Button
+              type="submit"
+              variant="primary"
+              size="2xs"
+              disabled={fetcherInFlight ? true : false}
+            >
+              Save
+            </Button>
+          </div>
         </div>
-      </div>
-    </RemixForm>
+      </RemixForm>
+    </FormProvider>
   );
 }

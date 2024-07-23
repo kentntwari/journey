@@ -35,7 +35,7 @@ import {
 export function Body() {
   const data = useCurrentCheckpointDetails();
 
-  if (!data) return <Skeletons.FetchingBodySkeleton />;
+  if (!data) return <Skeletons.FetchingCheckpointBodySkeleton />;
 
   if (data.error)
     return (
@@ -146,6 +146,7 @@ function StartDate({ date }: { date: Date }) {
               triggerRef.current?.focus();
             }}
           />
+
           <Popover.PopoverTrigger>
             <span ref={triggerRef} className="badge-date">
               {control.value ? format(control.value, "PPP") : ""}
@@ -207,10 +208,14 @@ function Title({ title }: { title: string }) {
   return (
     <Popover.Popover open={isEditTitle} onOpenChange={setIsEditTitle}>
       <Popover.PopoverTrigger asChild>
-        <button type="button" onClick={() => setIsEditTitle(true)}>
+        <button
+          type="button"
+          onClick={() => setIsEditTitle(true)}
+          className="text-left"
+        >
           <span
             ref={titleRef}
-            className={`capitalize font-semibold text-xl ${
+            className={`capitalize font-semibold text-xl  ${
               isEditTitle ? "opacity-50" : "opacity-100"
             }`}
           >

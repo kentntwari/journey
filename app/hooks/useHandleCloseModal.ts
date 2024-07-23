@@ -29,7 +29,7 @@ export function useHandleCloseModal({
 
     if (hydrated) {
       setCloseModal(false);
-      if (shouldNavigate) navigate("/journeys/" + params.title);
+      if (shouldNavigate) navigate("/journeys/" + params.slug);
     }
   }, []);
 

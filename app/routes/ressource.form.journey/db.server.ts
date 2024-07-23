@@ -1,4 +1,5 @@
 import { prisma } from "~/utils/prisma";
+import { generateSlug } from "~/utils/slug";
 
 export async function createUserJourney(
   user: {
@@ -28,6 +29,7 @@ export async function createUserJourney(
         journeys: {
           create: {
             title: title.trim(),
+            slug: generateSlug(title),
           },
         },
       },
@@ -39,12 +41,13 @@ export async function createUserJourney(
 
   await prisma.user.update({
     where: {
-      email: user.email,
+      id: dbUser.id,
     },
     data: {
       journeys: {
         create: {
           title: title.trim(),
+          slug: generateSlug(title),
         },
       },
     },

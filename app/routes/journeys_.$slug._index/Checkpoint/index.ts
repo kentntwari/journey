@@ -1,9 +1,9 @@
 import { Form } from "~/routes/ressource.form.checkpoint/Form";
 
 import * as Skeletons from "../Skeletons";
-import { Body } from "../Checkpoint/Body";
-import { Header } from "../Checkpoint/Header";
-import { Snippet } from "../Checkpoint/Snippet";
+import { Body } from "./Body";
+import { Header } from "./Header";
+import { Snippet } from "./Snippet";
 
 export const Checkpoint = {
   Snippet,
@@ -11,7 +11,7 @@ export const Checkpoint = {
   DetailsHeader: Header,
   DetailsBody: Body,
   Skeleton: {
-    Header: Skeletons.FetchingHeaderSkeleton,
-    Body: Skeletons.FetchingBodySkeleton,
+    Header: Skeletons.FetchingCheckpointHeaderSkeleton,
+    Body: Skeletons.FetchingCheckpointBodySkeleton,
   },
 } as const;

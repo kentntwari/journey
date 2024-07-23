@@ -2,25 +2,22 @@ import type { LinksFunction, LoaderFunctionArgs } from "@remix-run/node";
 
 import stylesheet from "~/tailwind.css?url";
 
-import { ScopeProvider as JotaiScopedProvider } from "jotai-scope";
-
 import {
-  json,
   Link,
   Links,
   Meta,
   Outlet,
   Scripts,
   ScrollRestoration,
-  useLoaderData,
   useNavigate,
 } from "@remix-run/react";
+import { typedjson, useTypedLoaderData } from "remix-typedjson";
 
 import { Button } from "./components/ui/button";
 
 import { verifyUser } from "./.server/verifyUser";
 
-import { isDialogOpenAtom } from "~/utils/atoms";
+const LOGOUT_URL = "/kinde-auth/logout";
 
 export const links: LinksFunction = () => [
   {
@@ -34,11 +31,11 @@ export const links: LinksFunction = () => [
 export async function loader({ request }: LoaderFunctionArgs) {
   const { isAuthenticated, user } = await verifyUser(request);
 
-  return json({ isAuthenticated, user });
+  return typedjson({ isAuthenticated, user });
 }
 
 export function Layout({ children }: { children: React.ReactNode }) {
-  const t = useLoaderData<typeof loader>();
+  const t = useTypedLoaderData<typeof loader>();
 
   return (
     <html lang="en">
@@ -65,24 +62,44 @@ export function Layout({ children }: { children: React.ReactNode }) {
 }
 
 export default function App() {
-  const t = useLoaderData<typeof loader>();
+  const t = useTypedLoaderData<typeof loader>();
+
+  return (
+    <>
+      <Navigation user={t.user} />
+
+      <main className="grow grid">
+        <Outlet />
+      </main>
+    </>
+  );
+}
+
+interface INavigationProps {
+  user: Awaited<ReturnType<typeof verifyUser>>["user"];
+}
+
+export function Navigation({ user }: INavigationProps) {
   const navigate = useNavigate();
 
   return (
     <>
       <nav className="px-3 w-full h-full flex items-center justify-between border-b border-neutral-grey-600">
-        <Link to="/" className="font-bold text-lg text-black">
+        <Link to="/" className="relative font-bold text-lg text-black">
           Journey.
+          <small className="absolute -top-1.5 font-semibold uppercase text-2xs text-blue-900">
+            BETA
+          </small>
         </Link>
-        {!t.user ? (
+        {!user ? (
           <Button size="sm" onClick={() => navigate("/journeys")}>
             Get started
           </Button>
         ) : (
-          <Link to={"/kinde-auth/logout"} className="cursor-pointer">
-            {t.user?.picture && (
+          <Link to={LOGOUT_URL} className="cursor-pointer">
+            {user?.picture && (
               <img
-                src={t.user.picture}
+                src={user.picture}
                 alt="profile-picture"
                 className="w-10 h-10 rounded-full"
               />
@@ -90,10 +107,6 @@ export default function App() {
           </Link>
         )}
       </nav>
-
-      <main className="grow grid">
-        <Outlet />
-      </main>
     </>
   );
 }

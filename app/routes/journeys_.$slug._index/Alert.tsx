@@ -5,6 +5,7 @@ import { useNavigation } from "@remix-run/react";
 import { Button } from "~/components/ui/button";
 import * as AlertDialog from "~/components/ui/alert-dialog";
 
+import { cn } from "~/utils/cn";
 import { isAlertDialogOpenAtom } from "~/utils/atoms";
 
 interface IAlertProps
@@ -25,7 +26,9 @@ export function Alert({ children, className }: IAlertProps) {
           className="bg-black/60"
           onClick={() => setOpen(false)}
         />
-        <AlertDialog.AlertDialogContent className={className}>
+        <AlertDialog.AlertDialogContent
+          className={cn("w-11/12 rounded-lg", className)}
+        >
           {children[1]}
         </AlertDialog.AlertDialogContent>
       </AlertDialog.AlertDialogPortal>

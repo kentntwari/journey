@@ -33,14 +33,17 @@ export function Snippet({ data, isLast, className, children }: ISnippetProps) {
   return (
     <li
       className={cn(
-        "grid grid-cols-[12px_repeat(3,1fr)] grid-rows-[28px_1fr]",
+        "grid grid-cols-[12px_repeat(3,1fr)] md:grid-cols-[0.5fr_12px_1fr] grid-rows-[28px_1fr]",
         className
       )}
     >
-      <div className="ml-2 -mt-[4px] col-start-2 row-start-1 h-fit">
-        <span className="text-sm">{format(data.startDate, "PPP")}</span>
+      <div className="ml-2 md:ml-0 -mt-[4px] col-start-2 md:col-start-1 row-start-1 h-fit md:flex md:items-center md:gap-4">
+        <span className="text-sm text-nowrap">
+          {format(data.startDate, "PPP")}
+        </span>
+        <span className="hidden md:block h-[1px] w-full bg-neutral-grey-900"></span>
       </div>
-      <div className="col-start-1 row-start-1 row-span-2 flex flex-col items-center">
+      <div className="col-start-1 md:col-start-2 row-start-1 row-span-2 flex flex-col items-center">
         <span className="block w-3 h-3 bg-neutral-grey-900 rounded-full"></span>
         <span
           className={`block ${
@@ -48,7 +51,7 @@ export function Snippet({ data, isLast, className, children }: ISnippetProps) {
           } w-[1px] h-40 text-center bg-neutral-grey-900`}
         ></span>
       </div>
-      <div className="col-start-2 col-span-3 row-start-2 h-[112px] ml-2 -mt-[4px] px-4 py-3 flex flex-col justify-between bg-white rounded-lg shadow-sm">
+      <div className="col-start-2 md:col-start-3 col-span-3 row-start-2 md:row-start-1 h-[112px] ml-2 md:ml-6 -mt-[4px] px-4 py-3 flex flex-col justify-between bg-white rounded-lg shadow-sm">
         <header>
           <p className="font-medium text-sm">{data.title}</p>
         </header>

@@ -20,7 +20,7 @@ export async function action({ request, params }: ActionFunctionArgs) {
   }
 
   await createMilestone(
-    submission.value.checkpointId,
+    submission.value.checkpointSlug,
     submission.value.milestone
   );
 

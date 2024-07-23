@@ -1,7 +1,7 @@
 import { z } from "zod";
 
 export const milestoneSchema = z.object({
-  id: z.string(),
+  slug: z.string(),
   status: z.union([z.literal("in progress"), z.literal("completed")]),
   deadline: z.date({
     required_error: "Deadline is required",
@@ -11,7 +11,7 @@ export const milestoneSchema = z.object({
 });
 
 export const createNewMilestoneSchema = z.object({
-  checkpointId: z.string(),
+  checkpointSlug: z.string(),
   milestone: z.preprocess((val) => {
     if (typeof val === "string") {
       try {
@@ -24,12 +24,12 @@ export const createNewMilestoneSchema = z.object({
 });
 
 export const challengeSchema = z.object({
-  id: z.string(),
+  slug: z.string(),
   description: z.string().min(1).max(100),
 });
 
 export const createNewChallengeSchema = z.object({
-  checkpointId: z.string(),
+  checkpointSlug: z.string(),
   challenge: z.preprocess((val) => {
     if (typeof val === "string") {
       try {
@@ -42,12 +42,12 @@ export const createNewChallengeSchema = z.object({
 });
 
 export const failureSchema = z.object({
-  id: z.string(),
+  slug: z.string(),
   description: z.string().min(1).max(100),
 });
 
 export const createNewFailureSchema = z.object({
-  checkpointId: z.string(),
+  checkpointSlug: z.string(),
   failure: z.preprocess((val) => {
     if (typeof val === "string") {
       try {
@@ -60,9 +60,10 @@ export const createNewFailureSchema = z.object({
 });
 
 export const checkpointSchema = z.object({
-  journeyTitle: z.string().nonempty(),
+  journeySlug: z.string().nonempty(),
   startDate: z.date(),
-  title: z.string().min(1).max(50),
+  title: z.string().min(50).max(500),
+  slug: z.string(),
   description: z.string().min(1).max(1000),
   milestones: z
     .preprocess((val) => {
@@ -86,39 +87,43 @@ export const checkpointSchema = z.object({
 
 export const skimmedCheckpointSchema = checkpointSchema
   .omit({
-    journeyTitle: true,
+    journeySlug: true,
     description: true,
     milestones: true,
     challenges: true,
     failures: true,
   })
   .extend({
-    id: z.string(),
+    slug: z.string(),
     milestones: z.number(),
     challenges: z.number(),
     failures: z.number(),
   });
 
-export const checkpointTitleSchema = checkpointSchema.pick({ title: true });
-export const checkpointDescriptionSchema = checkpointSchema.pick({
+export const updateCheckpointTitleSchema = checkpointSchema.pick({
+  title: true,
+});
+export const updateCheckpointDescriptionSchema = checkpointSchema.pick({
   description: true,
 });
-export const checkpointStartDateSchema = checkpointSchema.pick({
+export const updateCheckpointStartDateSchema = checkpointSchema.pick({
   startDate: true,
 });
 
+export const newCheckpointSchema = checkpointSchema.omit({ slug: true });
+
 export const deleteCheckpointSchema = z.object({
-  id: z.string(),
-  journeyTitle: z.string(),
+  slug: z.string(),
+  journeySlug: z.string(),
 });
 
 export const journeySchema = z.object({
-  id: z.string(),
+  slug: z.string(),
   title: z.string(),
   updatedAt: z.date(),
   checkpoints: z.array(
     z.object({
-      id: z.string(),
+      slug: z.string(),
       title: z.string(),
     })
   ),

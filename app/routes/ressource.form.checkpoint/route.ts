@@ -8,11 +8,11 @@ import { redirect, json } from "@remix-run/node";
 import * as db from "./db.server";
 
 import {
-  checkpointSchema,
+  newCheckpointSchema,
   deleteCheckpointSchema,
-  checkpointDescriptionSchema,
-  checkpointTitleSchema,
-  checkpointStartDateSchema,
+  updateCheckpointDescriptionSchema,
+  updateCheckpointTitleSchema,
+  updateCheckpointStartDateSchema,
 } from "~/utils/schemas";
 
 export async function action({ request, params }: ActionFunctionArgs) {
@@ -21,35 +21,43 @@ export async function action({ request, params }: ActionFunctionArgs) {
   switch (formData.get("intent")) {
     case "update-startDate": {
       const submission = parseWithZod(formData, {
-        schema: checkpointStartDateSchema.extend({ id: z.string() }),
+        schema: updateCheckpointStartDateSchema.extend({
+          slug: z.string(),
+        }),
       });
-
       if (submission.status !== "success") {
         return json(submission.reply());
       }
 
-      await db.updateStartDate(submission.value.id, submission.value.startDate);
+      await db.updateStartDate(
+        submission.value.slug,
+        submission.value.startDate
+      );
 
       return null;
     }
 
     case "update-title": {
       const submission = parseWithZod(formData, {
-        schema: checkpointTitleSchema.extend({ id: z.string() }),
+        schema: updateCheckpointTitleSchema.extend({
+          slug: z.string(),
+        }),
       });
 
       if (submission.status !== "success") {
         return json(submission.reply());
       }
 
-      await db.updateTitle(submission.value.id, submission.value.title);
+      await db.updateTitle(submission.value.slug, submission.value.title);
 
       return null;
     }
 
     case "update-description": {
       const submission = parseWithZod(formData, {
-        schema: checkpointDescriptionSchema.extend({ id: z.string() }),
+        schema: updateCheckpointDescriptionSchema.extend({
+          slug: z.string(),
+        }),
       });
 
       if (submission.status !== "success") {
@@ -57,7 +65,7 @@ export async function action({ request, params }: ActionFunctionArgs) {
       }
 
       await db.updateDescription(
-        submission.value.id,
+        submission.value.slug,
         submission.value.description
       );
 
@@ -72,14 +80,14 @@ export async function action({ request, params }: ActionFunctionArgs) {
       if (submission.status !== "success") {
         return json(submission.reply());
       }
-      await db.deleteCheckpoint(submission.value.id);
+      await db.deleteCheckpoint(submission.value.slug);
 
-      return redirect("/journeys/" + submission.value.journeyTitle);
+      return redirect("/journeys/" + submission.value.journeySlug);
     }
 
     default: {
       const submission = parseWithZod(formData, {
-        schema: checkpointSchema,
+        schema: newCheckpointSchema,
       });
 
       if (submission.status !== "success") {
@@ -87,16 +95,10 @@ export async function action({ request, params }: ActionFunctionArgs) {
       }
 
       await db.createNewCheckpoint({
-        journeyTitle: submission.value.journeyTitle,
-        title: submission.value.title,
-        description: submission.value.description,
-        startDate: submission.value.startDate,
-        milestones: submission.value.milestones,
-        challenges: submission.value.challenges,
-        failures: submission.value.failures,
+        ...submission.value,
       });
 
-      return redirect("/journeys/" + submission.value.journeyTitle);
+      return redirect("/journeys/" + submission.value.journeySlug);
     }
   }
 }

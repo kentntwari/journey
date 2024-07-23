@@ -1,14 +1,15 @@
 import type { FailureEntry } from "~/types";
 
 import { prisma } from "~/utils/prisma";
+import { generateSlug } from "~/utils/slug";
 
 export async function createFailure(
-  checkpointId: string,
-  failure: Omit<FailureEntry, "id">
+  checkpointSlug: string,
+  failure: Omit<FailureEntry, "slug">
 ) {
   try {
     const checkpoint = await prisma.checkpoint.findFirstOrThrow({
-      where: { id: checkpointId },
+      where: { slug: checkpointSlug },
       select: { id: true },
     });
 
@@ -16,6 +17,7 @@ export async function createFailure(
       data: {
         checkpointId: checkpoint.id,
         description: failure.description,
+        slug: generateSlug(failure.description.substring(0, 20)),
       },
     });
 

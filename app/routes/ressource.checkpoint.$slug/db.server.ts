@@ -1,19 +1,19 @@
 import { prisma } from "~/utils/prisma";
 
-export async function getDetails(id: string) {
+export async function getDetails(checkpointSlug: string) {
   try {
     const checkpoint = await prisma.checkpoint.findFirstOrThrow({
       where: {
-        id,
+        slug: checkpointSlug,
       },
       select: {
-        id: true,
         title: true,
+        slug: true,
         description: true,
         startDate: true,
         milestones: {
           select: {
-            id: true,
+            slug: true,
             status: true,
             deadline: true,
             description: true,
@@ -21,13 +21,13 @@ export async function getDetails(id: string) {
         },
         challenges: {
           select: {
-            id: true,
+            slug: true,
             description: true,
           },
         },
         failures: {
           select: {
-            id: true,
+            slug: true,
             description: true,
           },
         },

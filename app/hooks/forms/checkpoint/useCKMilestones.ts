@@ -13,14 +13,14 @@ export function useCKMilestones() {
   const setIsAddMilestone = useSetAtom(isAddMilestoneAtom);
 
   function set(formData: FormData) {
-    const { id, status, description, deadline } = extractCKData(
+    const { status, description, deadline } = extractCKData(
       formData,
       "milestone"
-    ) as MileStoneEntry;
+    );
 
     setPendingMilestones((prev) => [
       ...prev,
-      { id, status, description, deadline },
+      { status, description, deadline },
     ]);
     setIsAddMilestone(false);
   }

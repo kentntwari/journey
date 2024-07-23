@@ -22,8 +22,10 @@ model User {
 }
 
 model Journey {
-  id    String @id @default(cuid())
-  title String @unique
+  id      String   @id @default(cuid())
+  title   String   @unique
+  slug    String   @unique
+  isEnded Boolean? @default(false)
 
   checkpoints Checkpoint[]
   User        User?        @relation(fields: [userId], references: [id], onDelete: Cascade, onUpdate: Cascade)
@@ -31,12 +33,14 @@ model Journey {
   createdAt   DateTime     @default(now()) @map("created_at") @db.Date
   updatedAt   DateTime     @updatedAt @map("updated_at") @db.Date
 
+  @@index([id, slug])
   @@map("journeys")
 }
 
 model Checkpoint {
   id          String   @id @default(cuid())
   title       String
+  slug        String   @unique
   description String
   startDate   DateTime @map("start_date") @db.Date
 
@@ -49,11 +53,13 @@ model Checkpoint {
   createdAt DateTime @default(now()) @map("created_at") @db.Date
   updatedAt DateTime @updatedAt @map("updated_at") @db.Date
 
+  @@index([id, slug])
   @@map("checkpoints")
 }
 
 model Milestone {
   id          String   @id @default(cuid())
+  slug        String   @unique
   status      String   @default("in progress")
   deadline    DateTime @db.Date
   description String
@@ -64,11 +70,13 @@ model Milestone {
   createdAt DateTime @default(now()) @map("created_at") @db.Date
   updatedAt DateTime @updatedAt @map("updated_at") @db.Date
 
+  @@index([id, slug])
   @@map("milestones")
 }
 
 model Challenge {
   id           String      @id @default(cuid())
+  slug         String      @unique
   description  String
   Checkpoint   Checkpoint? @relation(fields: [checkpointId], references: [id], onDelete: Cascade, onUpdate: Cascade)
   checkpointId String?
@@ -76,11 +84,13 @@ model Challenge {
   createdAt DateTime @default(now()) @map("created_at") @db.Date
   updatedAt DateTime @updatedAt @map("updated_at") @db.Date
 
+  @@index([id, slug])
   @@map("challenges")
 }
 
 model Failure {
   id           String      @id @default(cuid())
+  slug         String      @unique
   description  String
   Checkpoint   Checkpoint? @relation(fields: [checkpointId], references: [id], onDelete: Cascade, onUpdate: Cascade)
   checkpointId String?
@@ -88,5 +98,6 @@ model Failure {
   createdAt DateTime @default(now()) @map("created_at") @db.Date
   updatedAt DateTime @updatedAt @map("updated_at") @db.Date
 
+  @@index([id, slug])
   @@map("failures")
 }

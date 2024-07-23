@@ -1,21 +1,22 @@
 import { z } from "zod";
 
 import { prisma } from "~/utils/prisma";
+import { generateSlug } from "~/utils/slug";
 import * as zodSchema from "~/utils/schemas";
 
 export async function createNewCheckpoint({
-  journeyTitle,
+  journeySlug,
   startDate,
   title,
   description,
   milestones,
   challenges,
   failures,
-}: z.infer<typeof zodSchema.checkpointSchema>) {
+}: z.infer<typeof zodSchema.newCheckpointSchema>) {
   try {
     const currentJourney = await prisma.journey.findFirst({
       where: {
-        title: journeyTitle,
+        slug: journeySlug,
       },
       select: {
         id: true,
@@ -29,22 +30,27 @@ export async function createNewCheckpoint({
         journeyId: currentJourney.id,
         startDate,
         title,
+        slug: generateSlug(title),
         description,
         milestones: {
           create: milestones.map((milestone) => ({
             status: milestone.status,
             description: milestone.description,
+            slug: generateSlug(milestone.description.substring(0, 20)),
+
             deadline: milestone.deadline,
           })),
         },
         challenges: {
           create: challenges.map((challenge) => ({
             description: challenge.description,
+            slug: generateSlug(challenge.description.substring(0, 20)),
           })),
         },
         failures: {
           create: failures.map((failure) => ({
             description: failure.description,
+            slug: generateSlug(failure.description.substring(0, 20)),
           })),
         },
       },
@@ -56,11 +62,11 @@ export async function createNewCheckpoint({
   }
 }
 
-export async function updateStartDate(checkpointId: string, startDate: Date) {
+export async function updateStartDate(checkpointSlug: string, startDate: Date) {
   try {
     const currentCheckpoint = await prisma.checkpoint.findFirstOrThrow({
       where: {
-        id: checkpointId,
+        slug: checkpointSlug,
       },
       select: {
         id: true,
@@ -84,11 +90,11 @@ export async function updateStartDate(checkpointId: string, startDate: Date) {
   }
 }
 
-export async function updateTitle(checkpointId: string, title: string) {
+export async function updateTitle(checkpointSlug: string, title: string) {
   try {
     const currentCheckpoint = await prisma.checkpoint.findFirstOrThrow({
       where: {
-        id: checkpointId,
+        slug: checkpointSlug,
       },
       select: {
         id: true,
@@ -113,13 +119,13 @@ export async function updateTitle(checkpointId: string, title: string) {
 }
 
 export async function updateDescription(
-  checkpointId: string,
+  checkpointSlug: string,
   description: string
 ) {
   try {
     const currentCheckpoint = await prisma.checkpoint.findFirstOrThrow({
       where: {
-        id: checkpointId,
+        slug: checkpointSlug,
       },
       select: {
         id: true,
@@ -143,11 +149,11 @@ export async function updateDescription(
   }
 }
 
-export async function deleteCheckpoint(checkpointId: string) {
+export async function deleteCheckpoint(checkpointSlug: string) {
   try {
     await prisma.checkpoint.delete({
       where: {
-        id: checkpointId,
+        slug: checkpointSlug,
       },
     });
   } catch (error) {

@@ -10,12 +10,9 @@ export function useCKChallenges() {
   const setIsAddChallenge = useSetAtom(isAddChallengeAtom);
 
   function set(formData: FormData) {
-    const { id, description } = extractCKData(
-      formData,
-      "challenge"
-    ) as ChallengeEntry;
+    const { description } = extractCKData(formData, "challenge");
 
-    setPendingChallenges((prev) => [...prev, { id, description }]);
+    setPendingChallenges((prev) => [...prev, { description }]);
     setIsAddChallenge(false);
   }
 

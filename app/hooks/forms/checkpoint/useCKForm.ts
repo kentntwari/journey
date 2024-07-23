@@ -2,12 +2,11 @@ import type {
   ChallengeEntry,
   FailureEntry,
   MileStoneEntry,
-  TitleEntry,
   JourneyEntry,
-  DescriptionEntry,
-  StartDateEntry,
-  CheckpointEntry,
-  DeleteCheckpointEntry,
+  UpdateDescriptionEntry,
+  UpdateTitleEntry,
+  UpdateStartDateEntry,
+  NewCheckpointEntry,
 } from "~/types";
 import type {
   FormMetadata,
@@ -25,18 +24,15 @@ import { useCKMilestones } from "./useCKMilestones";
 import { useCKChallenges } from "./useCKChallenges";
 import { useCKFailures } from "./useCKFailures";
 import { useCurrentCheckpointDetails } from "../../useCurrentCheckpointDetails";
-import { useHandleCloseModal } from "~/hooks/useHandleCloseModal";
-import { useResetCheckpointRelatedAtoms } from "~/hooks/useResetCheckpointRelatedAtoms";
 
 import {
   milestoneSchema,
   challengeSchema,
   failureSchema,
-  checkpointSchema,
-  checkpointTitleSchema,
-  checkpointDescriptionSchema,
-  checkpointStartDateSchema,
-  deleteCheckpointSchema,
+  newCheckpointSchema,
+  updateCheckpointTitleSchema,
+  updateCheckpointDescriptionSchema,
+  updateCheckpointStartDateSchema,
   newJourneyschema,
 } from "~/utils/schemas";
 import { submitCKUpdates, submitNewCK, deleteCK } from "~/utils/conform";
@@ -64,10 +60,10 @@ const schema = {
   milestone: milestoneSchema,
   challenge: challengeSchema,
   failure: failureSchema,
-  title: checkpointTitleSchema,
-  description: checkpointDescriptionSchema,
-  startDate: checkpointStartDateSchema,
-  "create-checkpoint": checkpointSchema,
+  title: updateCheckpointTitleSchema,
+  description: updateCheckpointDescriptionSchema,
+  startDate: updateCheckpointStartDateSchema,
+  "create-checkpoint": newCheckpointSchema,
   "delete-checkpoint": z.object({}),
 };
 
@@ -85,11 +81,11 @@ export function useCKForm(
 ];
 export function useCKForm(
   args: ICFRMArgs<"create-checkpoint"> & {
-    defaultValue?: DefaultValue<CheckpointEntry>;
+    defaultValue?: DefaultValue<NewCheckpointEntry>;
   }
 ): [
-  FormMetadata<CheckpointEntry, string[]>,
-  ReturnType<FormMetadata<CheckpointEntry, string[]>["getFieldset"]>
+  FormMetadata<NewCheckpointEntry, string[]>,
+  ReturnType<FormMetadata<NewCheckpointEntry, string[]>["getFieldset"]>
 ];
 export function useCKForm(
   args: ICFRMArgs<"journey"> & { defaultValue?: DefaultValue<JourneyEntry> }
@@ -116,24 +112,26 @@ export function useCKForm(
   ReturnType<FormMetadata<FailureEntry, string[]>["getFieldset"]>
 ];
 export function useCKForm(
-  args: ICFRMArgs<"title"> & { defaultValue?: DefaultValue<TitleEntry> }
+  args: ICFRMArgs<"title"> & { defaultValue?: DefaultValue<UpdateTitleEntry> }
 ): [
-  FormMetadata<TitleEntry, string[]>,
-  ReturnType<FormMetadata<TitleEntry, string[]>["getFieldset"]>
+  FormMetadata<UpdateTitleEntry, string[]>,
+  ReturnType<FormMetadata<UpdateTitleEntry, string[]>["getFieldset"]>
 ];
 export function useCKForm(
   args: ICFRMArgs<"description"> & {
-    defaultValue?: DefaultValue<DescriptionEntry>;
+    defaultValue?: DefaultValue<UpdateDescriptionEntry>;
   }
 ): [
-  FormMetadata<DescriptionEntry, string[]>,
-  ReturnType<FormMetadata<DescriptionEntry, string[]>["getFieldset"]>
+  FormMetadata<UpdateDescriptionEntry, string[]>,
+  ReturnType<FormMetadata<UpdateDescriptionEntry, string[]>["getFieldset"]>
 ];
 export function useCKForm(
-  args: ICFRMArgs<"startDate"> & { defaultValue?: DefaultValue<StartDateEntry> }
+  args: ICFRMArgs<"startDate"> & {
+    defaultValue?: DefaultValue<UpdateStartDateEntry>;
+  }
 ): [
-  FormMetadata<DescriptionEntry, string[]>,
-  ReturnType<FormMetadata<StartDateEntry, string[]>["getFieldset"]>
+  FormMetadata<UpdateStartDateEntry, string[]>,
+  ReturnType<FormMetadata<UpdateStartDateEntry, string[]>["getFieldset"]>
 ];
 export function useCKForm<
   T extends (typeof targets)[number],
@@ -170,6 +168,7 @@ export function useCKForm<
     defaultValue,
     onValidate({ formData }) {
       const res = parseWithZod(formData, { schema: schema[model] });
+      console.log(res);
       return res;
     },
     onSubmit(e) {
@@ -179,9 +178,9 @@ export function useCKForm<
 
       if (currentAction !== "add" && model === "milestone") {
         setMilestones(incomingFormData);
-        data?.results?.id &&
+        data?.results?.slug &&
           submitCKUpdates(
-            data.results.id,
+            data.results.slug,
             incomingFormData,
             submit,
             "milestone"
@@ -190,9 +189,9 @@ export function useCKForm<
 
       if (currentAction !== "add" && model === "challenge") {
         setChallenges(incomingFormData);
-        data?.results?.id &&
+        data?.results?.slug &&
           submitCKUpdates(
-            data.results.id,
+            data.results.slug,
             incomingFormData,
             submit,
             "challenge"
@@ -201,14 +200,19 @@ export function useCKForm<
 
       if (currentAction !== "add" && model === "failure") {
         setFailures(incomingFormData);
-        data?.results?.id &&
-          submitCKUpdates(data.results.id, incomingFormData, submit, "failure");
+        data?.results?.slug &&
+          submitCKUpdates(
+            data.results.slug,
+            incomingFormData,
+            submit,
+            "failure"
+          );
       }
 
       if (currentAction !== "add" && model === "title") {
-        data?.results?.id &&
+        data?.results?.slug &&
           submitCKUpdates(
-            data.results.id,
+            data.results.slug,
             incomingFormData,
             submit,
             "main",
@@ -217,9 +221,9 @@ export function useCKForm<
       }
 
       if (currentAction !== "add" && model === "description") {
-        data?.results?.id &&
+        data?.results?.slug &&
           submitCKUpdates(
-            data.results.id,
+            data.results.slug,
             incomingFormData,
             submit,
             "main",
@@ -228,13 +232,13 @@ export function useCKForm<
       }
 
       if (currentAction !== "add" && model === "startDate") {
-        data?.results?.id &&
+        data?.results?.slug &&
           submitCKUpdates(
-            data.results.id,
+            data.results.slug,
             incomingFormData,
             submit,
             "main",
-            "update-start-date"
+            "update-startDate"
           );
       }
 
@@ -261,10 +265,9 @@ export function useCKForm<
       }
 
       if (currentAction === "delete" && model === "delete-checkpoint") {
-        data?.results?.id &&
-          params.title &&
-          deleteCK(data.results.id, params.title, submit);
-
+        data?.results?.slug &&
+          params.slug &&
+          deleteCK(data.results.slug, params.slug, submit);
       }
 
       form.reset();

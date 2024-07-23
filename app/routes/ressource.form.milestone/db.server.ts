@@ -1,14 +1,15 @@
 import type { MileStoneEntry } from "~/types";
 
 import { prisma } from "~/utils/prisma";
+import { generateSlug } from "~/utils/slug";
 
 export async function createMilestone(
-  checkpointId: string,
-  milestone: Omit<MileStoneEntry, "id">
+  checkpointSlug: string,
+  milestone: Omit<MileStoneEntry, "slug">
 ) {
   try {
     const checkpoint = await prisma.checkpoint.findFirstOrThrow({
-      where: { id: checkpointId },
+      where: { slug: checkpointSlug },
       select: { id: true },
     });
 
@@ -17,6 +18,7 @@ export async function createMilestone(
         checkpointId: checkpoint.id,
         status: milestone.status,
         description: milestone.description,
+        slug: generateSlug(milestone.description.substring(0, 20)),
         deadline: milestone.deadline,
       },
     });

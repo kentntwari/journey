@@ -1,14 +1,15 @@
 import type { ChallengeEntry } from "~/types";
 
 import { prisma } from "~/utils/prisma";
+import { generateSlug } from "~/utils/slug";
 
 export async function createChallenge(
-  checkpointId: string,
+  checkpointSlug: string,
   challenge: Omit<ChallengeEntry, "id">
 ) {
   try {
     const checkpoint = await prisma.checkpoint.findFirstOrThrow({
-      where: { id: checkpointId },
+      where: { slug: checkpointSlug },
       select: { id: true },
     });
 
@@ -16,6 +17,7 @@ export async function createChallenge(
       data: {
         checkpointId: checkpoint.id,
         description: challenge.description,
+        slug: generateSlug(challenge.description.substring(0, 20)),
       },
     });
 

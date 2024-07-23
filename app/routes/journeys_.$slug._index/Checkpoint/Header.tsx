@@ -28,46 +28,41 @@ import {
   isEditCheckpointDescriptionAtom,
 } from "~/utils/atoms";
 
-import { getJourneyCheckpoints } from "../db.server";
-import { generateCheckpointId, getCurrentPosition } from "../generate";
+import { getJourney } from "../db.server";
+import { generateCheckpointId, getCurrentPosition } from "./generate";
 
 interface ILoadPositionProps {
-  checkpoints: Awaited<ReturnType<typeof getJourneyCheckpoints>>;
+  checkpoints: Awaited<ReturnType<typeof getJourney>>["checkpoints"];
 }
 
 export function Header() {
-  const { handleCloseModal } = useHandleCloseModal({ shouldNavigate: true });
-
-  const deferredCheckpoints = useTypedRouteLoaderData<typeof loader>(
+  const deferred = useTypedRouteLoaderData<typeof loader>(
     "routes/journeys_.$title._index"
   );
 
   return (
-    <Alert className="w-11/12 rounded-lg">
+    <Alert>
       <header className="w-full flex items-center justify-between">
         <div className="flex items-center gap-4">
           <span className="font-medium text-sm">View checkpoint</span>
 
-          {deferredCheckpoints ? (
+          {deferred ? (
             <Suspense fallback={<p>Loading positions...</p>}>
               <TypedAwait
-                resolve={deferredCheckpoints.checkpoints}
+                resolve={deferred.data}
                 errorElement={<p>Failed to load</p>}
               >
-                {(checkpoints) => <LoadPositions checkpoints={checkpoints} />}
+                {({ checkpoints }) => (
+                  <LoadPositions checkpoints={checkpoints} />
+                )}
               </TypedAwait>
             </Suspense>
           ) : null}
         </div>
+
         <div className="flex items-center gap-2">
           <ToggleEditOptionsBtn />
-          <button
-            type="button"
-            className="w-6 inline-flex justify-end"
-            onClick={handleCloseModal}
-          >
-            <X size={20} />
-          </button>
+          <ExitBtn />
         </div>
       </header>
 
@@ -80,7 +75,7 @@ export function Header() {
           </Alert.Description>
         </Alert.Header>
         <Alert.Cancel>Cancel</Alert.Cancel>
-        <DeleteCheckpointForm />
+        <DeleteCheckpointBtn />
       </>
     </Alert>
   );
@@ -110,11 +105,11 @@ export function LoadPositions({ checkpoints }: ILoadPositionProps) {
     return false;
   }
 
-  const currentPosition = !data?.results?.id
+  const currentPosition = !data?.results?.slug
     ? "-"
-    : getCurrentPosition(data.results.id, checkpoints) + 1;
+    : getCurrentPosition(data.results.slug, checkpoints) + 1;
 
-  const id = generateCheckpointId(data?.results?.id, checkpoints);
+  const id = generateCheckpointId(data?.results?.slug, checkpoints);
 
   return (
     <>
@@ -172,7 +167,7 @@ function ToggleEditOptionsBtn() {
           <Alert.Trigger
             name="_action"
             value="delete"
-            className="bg-transparent px-0 py-2 block text-sm font-semibold text-red-800"
+            className="bg-transparent px-0 py-1.5 block text-sm font-semibold text-red-800"
             onClick={() => {
               setSearchParams((prev) => {
                 prev.set("_action", "delete");
@@ -193,7 +188,7 @@ function EditDateBtn() {
 
   return (
     <button
-      className="py-2 block text-sm font-semibold"
+      className="py-1.5 block text-sm font-semibold"
       onClick={() => setIsEditStartDate(true)}
     >
       Change date
@@ -206,7 +201,7 @@ function EditTitleBtn() {
 
   return (
     <button
-      className="py-2 block text-sm font-semibold"
+      className="py-1.5 block text-sm font-semibold"
       onClick={() => setIsEditTitle(true)}
     >
       Change title
@@ -219,7 +214,7 @@ function EditDescriptionBtn() {
 
   return (
     <button
-      className="py-2 block text-sm font-semibold"
+      className="py-1.5 block text-sm font-semibold"
       onClick={() => setIsEditDescription(true)}
     >
       Change description
@@ -227,7 +222,7 @@ function EditDescriptionBtn() {
   );
 }
 
-function DeleteCheckpointForm() {
+function DeleteCheckpointBtn() {
   const [form] = useCKForm({
     shouldRevalidate: "onSubmit",
     model: "delete-checkpoint",
@@ -254,5 +249,19 @@ function DeleteCheckpointForm() {
         </RemixForm>
       </FormProvider>
     </>
+  );
+}
+
+function ExitBtn() {
+  const { handleCloseModal } = useHandleCloseModal({ shouldNavigate: true });
+
+  return (
+    <button
+      type="button"
+      className="w-6 inline-flex justify-end"
+      onClick={handleCloseModal}
+    >
+      <X size={20} />
+    </button>
   );
 }

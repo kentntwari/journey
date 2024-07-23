@@ -8,9 +8,14 @@ export async function getUserJourneys(userEmail: string) {
     select: {
       journeys: {
         select: {
-          id: true,
+          slug: true,
           title: true,
-          checkpoints: true,
+          checkpoints: {
+            select: {
+              slug: true,
+              title: true,
+            },
+          },
           updatedAt: true,
         },
       },

@@ -5,6 +5,7 @@ import {
   getTextareaProps,
 } from "@conform-to/react";
 import { Ellipsis, XIcon } from "lucide-react";
+import { useAtomValue } from "jotai";
 
 import { useParams, Form as RemixForm } from "@remix-run/react";
 
@@ -19,6 +20,12 @@ import { Textarea } from "~/components/ui/textarea";
 import { Tabs } from "./Tabs";
 import { StartDate } from "./StartDate";
 
+import {
+  isAddChallengeAtom,
+  isAddFailureAtom,
+  isAddMilestoneAtom,
+} from "~/utils/atoms";
+
 export function Form() {
   const params = useParams();
 
@@ -30,6 +37,10 @@ export function Form() {
   const { handleCloseModal } = useHandleCloseModal();
 
   const { resetAtoms } = useResetCheckpointRelatedAtoms();
+
+  const isAddChallenge = useAtomValue(isAddChallengeAtom);
+  const isAddFailure = useAtomValue(isAddFailureAtom);
+  const isAddMilestone = useAtomValue(isAddMilestoneAtom);
 
   return (
     <>
@@ -49,10 +60,19 @@ export function Form() {
             <header className="flex items-center justify-between">
               <h3 className="font-semibold text-xl">New checkpoint</h3>
               <div className="flex items-center gap-3">
-                <Button type="submit" size="sm" className="w-[72px]">
+                <Button
+                  type="submit"
+                  size="sm"
+                  className="w-[72px]"
+                  disabled={isAddChallenge || isAddFailure || isAddMilestone}
+                >
                   Save
                 </Button>
-                <button type="button">
+                <button
+                  type="button"
+                  disabled={isAddChallenge || isAddFailure || isAddMilestone}
+                  onClick={handleCloseModal}
+                >
                   <Ellipsis size={24} className="text-neutral-grey-1000" />
                 </button>
                 <ExitBtn />
@@ -61,8 +81,8 @@ export function Form() {
 
             <input
               hidden
-              name={fields.journeyTitle.name}
-              defaultValue={params.title}
+              name={fields.journeySlug.name}
+              defaultValue={params.slug}
             />
             <fieldset className="mt-10 space-y-6">
               <StartDate meta={fields.startDate}>

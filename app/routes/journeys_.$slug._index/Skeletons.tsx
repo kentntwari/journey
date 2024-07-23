@@ -1,4 +1,4 @@
-export function FetchingHeaderSkeleton() {
+export function FetchingCheckpointHeaderSkeleton() {
   return (
     <div className="mb-8 flex items-center justify-between animate-pulse">
       <div className="w-full flex items-center gap-2">
@@ -10,7 +10,7 @@ export function FetchingHeaderSkeleton() {
   );
 }
 
-export function FetchingBodySkeleton() {
+export function FetchingCheckpointBodySkeleton() {
   return (
     <>
       <div className="space-y-4">
@@ -28,5 +28,15 @@ export function FetchingBodySkeleton() {
         <div className="h-10 w-full bg-neutral-grey-400 rounded-lg"></div>
       </div>
     </>
+  );
+}
+
+export function FetchingJourneySkeleton() {
+  return (
+    <div className="mt-6 px-3 space-y-4">
+      <div className="w-[120px] h-7 bg-neutral-grey-400 animate-pulse rounded-lg"></div>
+      <div className="w-2/3 h-7 bg-neutral-grey-400 animate-pulse rounded-lg"></div>
+      <div className="grid w-full h-5/6 bg-neutral-grey-400 animate-pulse rounded-lg"></div>
+    </div>
   );
 }
