@@ -8,7 +8,4 @@ installGlobals();
 
 export default defineConfig({
   plugins: [remixDevTools(), remix(), tsconfigPaths()],
-  build: {
-    commonjsOptions: { include: [] },
-  },
 });
