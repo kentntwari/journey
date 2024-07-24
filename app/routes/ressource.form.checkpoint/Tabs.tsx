@@ -7,7 +7,7 @@ import * as UITabs from "~/components/ui/tabs";
 
 import { useCurrentCheckpointDetails } from "~/hooks/useCurrentCheckpointDetails";
 
-import { Milestones } from "./Milestones";
+// import { Milestones } from "./Milestones";
 import { Challenges } from "./Challenges";
 import { Failures } from "./Failures";
 
@@ -90,9 +90,10 @@ export function Tabs({
             <>
               {typeof initialValues !== "undefined" && (
                 <>
-                  {tab === "milestones" ? (
+                Milestones
+                  {/* {tab === "milestones" ? (
                     <Milestones initialValues={initialValues.milestones} />
-                  ) : null}
+                  ) : null} */}
 
                   {tab === "challenges" ? (
                     <Challenges initialValues={initialValues.challenges} />
