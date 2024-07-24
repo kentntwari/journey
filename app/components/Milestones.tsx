@@ -10,7 +10,7 @@ import { Fragment } from "react";
 import { Button } from "~/components/ui/button";
 import * as Popover from "~/components/ui/popover";
 
-import { Form } from "../ressource.form.milestone/Form";
+import { Form } from "../routes/ressource.form.milestone/Form";
 
 import { pendingMilestonesAtom, isAddMilestoneAtom } from "~/utils/atoms";
 import { milestoneSchema } from "~/utils/schemas";
