@@ -7,7 +7,7 @@ import * as UITabs from "~/components/ui/tabs";
 
 import { useCurrentCheckpointDetails } from "~/hooks/useCurrentCheckpointDetails";
 
-import { Milestones } from "~/routes/ressource.form.checkpoint/Milestones";
+import { Milestones } from "./Milestones";
 import { Challenges } from "./Challenges";
 import { Failures } from "./Failures";
 
