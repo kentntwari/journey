@@ -1,21 +1,19 @@
-import type React from "react";
-
 import { z } from "zod";
 import { nanoid } from "nanoid";
 import { Plus } from "lucide-react";
 import { useAtom, useAtomValue, useSetAtom } from "jotai";
 
-import { Fragment } from "react";
-
 import { useSearchParams } from "@remix-run/react";
 
-import { Form } from "~/routes/ressource.form.milestone/Form";
+import { Fragment } from "react";
 
 import { Button } from "~/components/ui/button";
 import * as Popover from "~/components/ui/popover";
 
+import { Form } from "../ressource.form.milestone/Form";
+
+import { pendingMilestonesAtom, isAddMilestoneAtom } from "~/utils/atoms";
 import { milestoneSchema } from "~/utils/schemas";
-import { isAddMilestoneAtom, pendingMilestonesAtom } from "~/utils/atoms";
 
 interface IMilestonesProps {
   initialValues: z.infer<typeof milestoneSchema>[];
@@ -27,7 +25,7 @@ interface ISingleMilestoneProps extends React.ComponentProps<"article"> {
   description: string;
 }
 
-// Milestones.Form = Form;
+Milestones.Form = Form;
 
 export function Milestones({ initialValues }: IMilestonesProps) {
   const [isAddMilestone, setIsAddMilestone] = useAtom(isAddMilestoneAtom);
@@ -42,7 +40,7 @@ export function Milestones({ initialValues }: IMilestonesProps) {
       <>
         {isAddMilestone ? (
           <div className="form-wrapper">
-            <Form />
+            <Milestones.Form />
           </div>
         ) : (
           <div className="mt-20 w-full flex flex-col justify-center items-center gap-4">
@@ -74,7 +72,7 @@ export function Milestones({ initialValues }: IMilestonesProps) {
             </Popover.PopoverTrigger>
             <Popover.PopoverContent className="p-0 border-none">
               <div className="form-wrapper">
-                <Form />
+                <Milestones.Form />
               </div>
             </Popover.PopoverContent>{" "}
           </div>
