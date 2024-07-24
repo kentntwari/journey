@@ -27,7 +27,7 @@ interface ISingleMilestoneProps extends React.ComponentProps<"article"> {
   description: string;
 }
 
-Milestones.Form = Form;
+// Milestones.Form = Form;
 
 export function Milestones({ initialValues }: IMilestonesProps) {
   const [isAddMilestone, setIsAddMilestone] = useAtom(isAddMilestoneAtom);
@@ -42,7 +42,7 @@ export function Milestones({ initialValues }: IMilestonesProps) {
       <>
         {isAddMilestone ? (
           <div className="form-wrapper">
-            <Milestones.Form />
+            <Form />
           </div>
         ) : (
           <div className="mt-20 w-full flex flex-col justify-center items-center gap-4">
@@ -56,40 +56,42 @@ export function Milestones({ initialValues }: IMilestonesProps) {
     );
 
   return (
-    <Popover.Popover open={isAddMilestone} onOpenChange={setIsAddMilestone}>
-      <div className="space-y-4">
-        <div className="w-full flex items-center justify-between">
-          {currentAction === "add" && pendingMilestones.length > 0 ? (
-            <p className="font-semibold text-sm text-neutral-900">
-              {pendingMilestones.length}{" "}
-              {pendingMilestones.length === 1 ? "milestone" : "milestones"}{" "}
-              added
-            </p>
-          ) : null}
-          <Popover.PopoverTrigger asChild>
-            <Button type="button" variant="neutral" size="md">
-              <Plus /> <span className="inherit">Add milestone</span>
-            </Button>
-          </Popover.PopoverTrigger>
-          <Popover.PopoverContent className="p-0 border-none">
-            <div className="form-wrapper">
-              <Milestones.Form />
-            </div>
-          </Popover.PopoverContent>{" "}
-        </div>
+    <>
+      <Popover.Popover open={isAddMilestone} onOpenChange={setIsAddMilestone}>
+        <div className="space-y-4">
+          <div className="w-full flex items-center justify-between">
+            {currentAction === "add" && pendingMilestones.length > 0 ? (
+              <p className="font-semibold text-sm text-neutral-900">
+                {pendingMilestones.length}{" "}
+                {pendingMilestones.length === 1 ? "milestone" : "milestones"}{" "}
+                added
+              </p>
+            ) : null}
+            <Popover.PopoverTrigger asChild>
+              <Button type="button" variant="neutral" size="md">
+                <Plus /> <span className="inherit">Add milestone</span>
+              </Button>
+            </Popover.PopoverTrigger>
+            <Popover.PopoverContent className="p-0 border-none">
+              <div className="form-wrapper">
+                <Form />
+              </div>
+            </Popover.PopoverContent>{" "}
+          </div>
 
-        <section className="space-y-3">
-          {[...pendingMilestones, ...initialValues].map((milestone) => (
-            <Fragment key={nanoid()}>
-              <SingleMilestone
-                status={milestone.status}
-                description={milestone.description}
-              />
-            </Fragment>
-          ))}
-        </section>
-      </div>
-    </Popover.Popover>
+          <section className="space-y-3">
+            {[...pendingMilestones, ...initialValues].map((milestone) => (
+              <Fragment key={nanoid()}>
+                <SingleMilestone
+                  status={milestone.status}
+                  description={milestone.description}
+                />
+              </Fragment>
+            ))}
+          </section>
+        </div>
+      </Popover.Popover>
+    </>
   );
 }
 
@@ -105,7 +107,7 @@ function SingleMilestone({ status, description }: ISingleMilestoneProps) {
     >
       <header className="flex items-center gap-2">
         <span
-          className={`min-w-[72px] h-5 capitalize font-medium text-center 
+          className={`min-w-[72px] h-5 capitalize font-medium text-center
           text-2xs text-white rounded-[5px] ${
             status === "completed" ? "bg-green-800" : "bg-neutral-grey-1000"
           }`}
