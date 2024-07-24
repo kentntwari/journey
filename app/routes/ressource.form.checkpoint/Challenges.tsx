@@ -1,6 +1,6 @@
 import type React from "react";
 
-import { nan, z } from "zod";
+import { z } from "zod";
 import { nanoid } from "nanoid";
 import { Plus } from "lucide-react";
 import { useAtom, useAtomValue, useSetAtom } from "jotai";

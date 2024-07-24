@@ -1,0 +1,230 @@
+{
+  "buildManifest": {
+    "serverBundles": {
+      "nodejs-eyJydW50aW1lIjoibm9kZWpzIn0": {
+        "id": "nodejs-eyJydW50aW1lIjoibm9kZWpzIn0",
+        "file": "build/server/nodejs-eyJydW50aW1lIjoibm9kZWpzIn0/index.js",
+        "config": {
+          "runtime": "nodejs"
+        }
+      }
+    },
+    "routeIdToServerBundleId": {
+      "routes/ressource.checkpoint.$slug": "nodejs-eyJydW50aW1lIjoibm9kZWpzIn0",
+      "routes/ressource.form.checkpoint": "nodejs-eyJydW50aW1lIjoibm9kZWpzIn0",
+      "routes/ressource.form.challenge": "nodejs-eyJydW50aW1lIjoibm9kZWpzIn0",
+      "routes/ressource.form.milestone": "nodejs-eyJydW50aW1lIjoibm9kZWpzIn0",
+      "routes/journeys_.$slug._index": "nodejs-eyJydW50aW1lIjoibm9kZWpzIn0",
+      "routes/ressource.form.failure": "nodejs-eyJydW50aW1lIjoibm9kZWpzIn0",
+      "routes/ressource.form.journey": "nodejs-eyJydW50aW1lIjoibm9kZWpzIn0",
+      "routes/kinde-auth.$index": "nodejs-eyJydW50aW1lIjoibm9kZWpzIn0",
+      "routes/journeys": "nodejs-eyJydW50aW1lIjoibm9kZWpzIn0",
+      "routes/skeleton": "nodejs-eyJydW50aW1lIjoibm9kZWpzIn0",
+      "routes/_index": "nodejs-eyJydW50aW1lIjoibm9kZWpzIn0"
+    },
+    "routes": {
+      "root": {
+        "path": "",
+        "id": "root",
+        "file": "app/root.tsx",
+        "config": {}
+      },
+      "routes/ressource.checkpoint.$slug": {
+        "file": "app/routes/ressource.checkpoint.$slug/route.tsx",
+        "id": "routes/ressource.checkpoint.$slug",
+        "path": "ressource/checkpoint/:slug",
+        "parentId": "root",
+        "config": {
+          "runtime": "nodejs"
+        }
+      },
+      "routes/ressource.form.checkpoint": {
+        "file": "app/routes/ressource.form.checkpoint/route.ts",
+        "id": "routes/ressource.form.checkpoint",
+        "path": "ressource/form/checkpoint",
+        "parentId": "root",
+        "config": {
+          "runtime": "nodejs"
+        }
+      },
+      "routes/ressource.form.challenge": {
+        "file": "app/routes/ressource.form.challenge/route.ts",
+        "id": "routes/ressource.form.challenge",
+        "path": "ressource/form/challenge",
+        "parentId": "root",
+        "config": {
+          "runtime": "nodejs"
+        }
+      },
+      "routes/ressource.form.milestone": {
+        "file": "app/routes/ressource.form.milestone/route.ts",
+        "id": "routes/ressource.form.milestone",
+        "path": "ressource/form/milestone",
+        "parentId": "root",
+        "config": {
+          "runtime": "nodejs"
+        }
+      },
+      "routes/journeys_.$slug._index": {
+        "file": "app/routes/journeys_.$slug._index/route.tsx",
+        "id": "routes/journeys_.$slug._index",
+        "path": "journeys/:slug",
+        "index": true,
+        "parentId": "root",
+        "config": {
+          "runtime": "nodejs"
+        }
+      },
+      "routes/ressource.form.failure": {
+        "file": "app/routes/ressource.form.failure/route.ts",
+        "id": "routes/ressource.form.failure",
+        "path": "ressource/form/failure",
+        "parentId": "root",
+        "config": {
+          "runtime": "nodejs"
+        }
+      },
+      "routes/ressource.form.journey": {
+        "file": "app/routes/ressource.form.journey/route.ts",
+        "id": "routes/ressource.form.journey",
+        "path": "ressource/form/journey",
+        "parentId": "root",
+        "config": {
+          "runtime": "nodejs"
+        }
+      },
+      "routes/kinde-auth.$index": {
+        "file": "app/routes/kinde-auth.$index.tsx",
+        "id": "routes/kinde-auth.$index",
+        "path": "kinde-auth/:index",
+        "parentId": "root",
+        "config": {
+          "runtime": "nodejs"
+        }
+      },
+      "routes/journeys": {
+        "file": "app/routes/journeys/route.tsx",
+        "id": "routes/journeys",
+        "path": "journeys",
+        "parentId": "root",
+        "config": {
+          "runtime": "nodejs"
+        }
+      },
+      "routes/skeleton": {
+        "file": "app/routes/skeleton.tsx",
+        "id": "routes/skeleton",
+        "path": "skeleton",
+        "parentId": "root",
+        "config": {
+          "runtime": "nodejs"
+        }
+      },
+      "routes/_index": {
+        "file": "app/routes/_index.tsx",
+        "id": "routes/_index",
+        "index": true,
+        "parentId": "root",
+        "config": {
+          "runtime": "nodejs"
+        }
+      }
+    }
+  },
+  "remixConfig": {
+    "appDirectory": "C:\\Users\\User\\Desktop\\code-projects-concepts\\journey\\app",
+    "basename": "/",
+    "buildDirectory": "C:\\Users\\User\\Desktop\\code-projects-concepts\\journey\\build",
+    "future": {
+      "v3_fetcherPersist": false,
+      "v3_relativeSplatPath": false,
+      "v3_throwAbortReason": false,
+      "unstable_singleFetch": false,
+      "unstable_fogOfWar": false
+    },
+    "manifest": false,
+    "publicPath": "/",
+    "routes": {
+      "root": {
+        "path": "",
+        "id": "root",
+        "file": "root.tsx"
+      },
+      "routes/ressource.checkpoint.$slug": {
+        "file": "routes/ressource.checkpoint.$slug/route.tsx",
+        "id": "routes/ressource.checkpoint.$slug",
+        "path": "ressource/checkpoint/:slug",
+        "parentId": "root"
+      },
+      "routes/ressource.form.checkpoint": {
+        "file": "routes/ressource.form.checkpoint/route.ts",
+        "id": "routes/ressource.form.checkpoint",
+        "path": "ressource/form/checkpoint",
+        "parentId": "root"
+      },
+      "routes/ressource.form.challenge": {
+        "file": "routes/ressource.form.challenge/route.ts",
+        "id": "routes/ressource.form.challenge",
+        "path": "ressource/form/challenge",
+        "parentId": "root"
+      },
+      "routes/ressource.form.milestone": {
+        "file": "routes/ressource.form.milestone/route.ts",
+        "id": "routes/ressource.form.milestone",
+        "path": "ressource/form/milestone",
+        "parentId": "root"
+      },
+      "routes/journeys_.$slug._index": {
+        "file": "routes/journeys_.$slug._index/route.tsx",
+        "id": "routes/journeys_.$slug._index",
+        "path": "journeys/:slug",
+        "index": true,
+        "parentId": "root"
+      },
+      "routes/ressource.form.failure": {
+        "file": "routes/ressource.form.failure/route.ts",
+        "id": "routes/ressource.form.failure",
+        "path": "ressource/form/failure",
+        "parentId": "root"
+      },
+      "routes/ressource.form.journey": {
+        "file": "routes/ressource.form.journey/route.ts",
+        "id": "routes/ressource.form.journey",
+        "path": "ressource/form/journey",
+        "parentId": "root"
+      },
+      "routes/kinde-auth.$index": {
+        "file": "routes/kinde-auth.$index.tsx",
+        "id": "routes/kinde-auth.$index",
+        "path": "kinde-auth/:index",
+        "parentId": "root"
+      },
+      "routes/journeys": {
+        "file": "routes/journeys/route.tsx",
+        "id": "routes/journeys",
+        "path": "journeys",
+        "parentId": "root"
+      },
+      "routes/skeleton": {
+        "file": "routes/skeleton.tsx",
+        "id": "routes/skeleton",
+        "path": "skeleton",
+        "parentId": "root"
+      },
+      "routes/_index": {
+        "file": "routes/_index.tsx",
+        "id": "routes/_index",
+        "index": true,
+        "parentId": "root"
+      }
+    },
+    "serverBuildFile": "index.js",
+    "serverModuleFormat": "esm",
+    "ssr": true
+  },
+  "viteConfig": {
+    "build": {
+      "assetsDir": "assets"
+    }
+  }
+}
