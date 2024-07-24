@@ -9,7 +9,7 @@ import { useCurrentCheckpointDetails } from "~/hooks/useCurrentCheckpointDetails
 
 import { Challenges } from "./Challenges";
 import { Failures } from "./Failures";
-import { Milestones } from "../../components/Milestones";
+import { Milestones } from "./Milestones";
 
 import {
   pendingMilestonesAtom,
