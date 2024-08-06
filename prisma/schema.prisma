@@ -14,11 +14,12 @@ datasource db {
 }
 
 model User {
-  id        String    @id @default(cuid())
+  id        String    @id @unique
   firstName String    @map("first_name")
   lastName  String    @map("last_name")
-  email     String    @unique
   journeys  Journey[]
+
+  @@index([id])
 }
 
 model Journey {

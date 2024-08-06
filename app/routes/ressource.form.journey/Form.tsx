@@ -18,9 +18,12 @@ import {
 import { Button } from "~/components/ui/button";
 import { Textarea } from "~/components/ui/textarea";
 
+import { cn } from "~/utils/cn";
 import { newJourneyschema } from "~/utils/schemas";
 
-export function Form() {
+interface IFormProps extends React.ComponentPropsWithoutRef<typeof RemixForm> {}
+
+export function Form({ className, ...props }: IFormProps) {
   const textInputRef = useRef<HTMLTextAreaElement>(null);
 
   const submit = useSubmit();
@@ -65,10 +68,10 @@ export function Form() {
         method="POST"
         key={form.key}
         action="/ressource/form/journey"
-        className="w-full"
+        className={cn("w-full", className)}
         onSubmit={form.onSubmit}
       >
-        <div className="w-full h-44 p-4 flex flex-col justify-between items-end bg-blue-200 border border-blue-900 rounded-lg">
+        <div className="w-full min-h-44 max-h-[216px] p-4 flex flex-col justify-between items-end bg-blue-200 border border-blue-900 rounded-lg">
           <div className="w-full space-y-1">
             <Textarea
               {...getTextareaProps(fields.title)}

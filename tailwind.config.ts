@@ -14,6 +14,7 @@ const config = {
   theme: {
     screens: {
       md: "620px",
+      xl: "1440px",
     },
 
     container: {

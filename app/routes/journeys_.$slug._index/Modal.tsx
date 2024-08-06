@@ -89,7 +89,7 @@ export function Modal({
       <Dialog.DialogPortal>
         <Dialog.DialogOverlay className="bg-black/60">
           <Dialog.DialogContent
-            className="inset-0 md:inset-auto md:right-0 top-32 md:top-0 md:h-full translate-x-0 translate-y-0 py-4 px-0 bg-neutral-grey-200 rounded-t-lg overflow-auto"
+            className="inset-0 md:inset-auto md:right-2 top-32 md:top-1/2 md:h-[98%] translate-x-0 translate-y-0 md:-translate-y-1/2 py-4 px-0 bg-neutral-grey-200 rounded-t-lg md:rounded-b-lg overflow-auto"
             onInteractOutside={() => {
               handleCloseModal();
               if (shouldResetCheckpointRelatedAtoms) resetAtoms();

@@ -63,7 +63,7 @@ export function Title() {
             isEditTitle ? "opacity-60" : "opacity-100"
           }`}
         >
-          {params.title}
+          {params.slug}
         </h1>
       </Popover.PopoverTrigger>
       <Popover.PopoverContent className="p-0 border-none">

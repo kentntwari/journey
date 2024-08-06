@@ -19,7 +19,10 @@ export function Options({ children, status }: IOptionsProps) {
     <Alert>
       <Popover.Popover open={isOpen} onOpenChange={setIsOpen}>
         <Popover.PopoverTrigger asChild>{children}</Popover.PopoverTrigger>
-        <Popover.PopoverContent className="w-fit px-3 py-2 border-0">
+        <Popover.PopoverContent
+          className="w-fit px-3 py-2 border-0"
+          align="end"
+        >
           <EndJourneyBtn isEnded={status} />
 
           <Alert.Trigger
@@ -56,7 +59,6 @@ function DeleteJourneyBtn() {
       onSubmit={(e) => {
         fetcher.submit(e.currentTarget, {
           method: "DELETE",
-          navigate: false,
         });
       }}
     >

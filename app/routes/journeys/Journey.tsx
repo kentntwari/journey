@@ -8,20 +8,21 @@ import { Link } from "@remix-run/react";
 
 import { Separator } from "~/components/ui/separator";
 
+import { cn } from "~/utils/cn";
 import { journeySchema } from "~/utils/schemas";
 
 interface JourneyProps extends React.ComponentProps<"article"> {
   data: z.infer<typeof journeySchema>;
 }
 
-export function Journey({ data }: JourneyProps) {
+export function Journey({ data, className }: JourneyProps) {
   return (
     <>
-      <article>
+      <article className={cn("", className)}>
         <Link
           to={`/journeys/${data.slug}`}
           prefetch="intent"
-          className="bg-white p-4 min-h-[138px] flex flex-col justify-between items-start rounded-lg shadow-sm"
+          className="bg-white p-4 min-h-[138px] xl:min-h-[216px] h-full flex flex-col justify-between items-start rounded-lg shadow-sm"
         >
           <div className="grow space-y-4">
             <header>

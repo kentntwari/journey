@@ -46,7 +46,7 @@ export function Layout({ children }: { children: React.ReactNode }) {
         <Links />
       </head>
       <body
-        className={`pb-4 min-h-screen min-h-[100dvh] grid grid-rows-[72px_1fr] text-sm text-neutral-grey-1000 ${
+        className={`pb-4 min-h-screen min-h-[100dvh] *:max-w-[1920px] *:mx-auto grid grid-rows-[72px_1fr] text-sm text-neutral-grey-1000 ${
           t.isAuthenticated
             ? "bg-neutral-grey-200"
             : "lg:px-[120px] bg-neutral-grey-300"
@@ -68,7 +68,7 @@ export default function App() {
     <>
       <Navigation user={t.user} />
 
-      <main className="grow grid">
+      <main className="w-full grow grid">
         <Outlet />
       </main>
     </>
@@ -88,7 +88,7 @@ export function Navigation({ user }: INavigationProps) {
         <Link to="/" className="relative font-bold text-lg text-black">
           Journey.
           <small className="absolute -top-1.5 font-semibold uppercase text-2xs text-blue-900">
-            BETA
+            ALPHA
           </small>
         </Link>
         {!user ? (
