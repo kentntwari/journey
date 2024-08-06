@@ -22,14 +22,7 @@ export async function action({ request }: ActionFunctionArgs) {
     return json(submission.reply());
   }
 
-  await db.createUserJourney(
-    {
-      email: currentUser.email,
-      firstName: currentUser.given_name,
-      lastName: currentUser.family_name,
-    },
-    submission.value.title
-  );
+  await db.createUserJourney(currentUser.id, submission.value.title);
 
   json({ ok: true });
 
