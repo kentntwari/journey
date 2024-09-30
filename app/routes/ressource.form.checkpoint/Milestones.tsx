@@ -65,12 +65,10 @@ export function Milestones({ initialValues }: IMilestonesProps) {
                 added
               </p>
             ) : null}
-            <Popover.PopoverTrigger asChild>
-              <Button type="button" variant="neutral" size="md">
-                <Plus /> <span className="inherit">Add milestone</span>
-              </Button>
-            </Popover.PopoverTrigger>
-            <Popover.PopoverContent className="p-0 border-none">
+            <Popover.PopoverAnchor>
+              <ToggleMilestoneFormBtn />
+            </Popover.PopoverAnchor>
+            <Popover.PopoverContent className="p-0 border-none" align="start">
               <div className="form-wrapper">
                 <Milestones.Form />
               </div>

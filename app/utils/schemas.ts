@@ -1,7 +1,6 @@
 import { z } from "zod";
 
 export const milestoneSchema = z.object({
-  slug: z.string(),
   status: z.union([z.literal("in progress"), z.literal("completed")]),
   deadline: z.date({
     required_error: "Deadline is required",
@@ -24,7 +23,6 @@ export const createNewMilestoneSchema = z.object({
 });
 
 export const challengeSchema = z.object({
-  slug: z.string(),
   description: z.string().min(1).max(100),
 });
 
@@ -42,7 +40,6 @@ export const createNewChallengeSchema = z.object({
 });
 
 export const failureSchema = z.object({
-  slug: z.string(),
   description: z.string().min(1).max(100),
 });
 
@@ -62,7 +59,7 @@ export const createNewFailureSchema = z.object({
 export const checkpointSchema = z.object({
   journeySlug: z.string().nonempty(),
   startDate: z.date(),
-  title: z.string().min(50).max(500),
+  title: z.string().min(1).max(500),
   slug: z.string(),
   description: z.string().min(1).max(1000),
   milestones: z

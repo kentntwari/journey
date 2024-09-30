@@ -9,13 +9,9 @@ export const isAddMilestoneAtom = atom(false);
 export const isAddChallengeAtom = atom(false);
 export const isAddFailureAtom = atom(false);
 
-export const pendingMilestonesAtom = atom<Omit<MileStoneEntry, "slug">[]>([]);
-export const pendingChallengesAtom = atom<
-  Pick<ChallengeEntry, "description">[]
->([]);
-export const pendingFailuresAtom = atom<Pick<FailureEntry, "description">[]>(
-  []
-);
+export const pendingMilestonesAtom = atom<MileStoneEntry[]>([]);
+export const pendingChallengesAtom = atom<ChallengeEntry[]>([]);
+export const pendingFailuresAtom = atom<FailureEntry[]>([]);
 
 export const isEditJourneyTitleAtom = atom(false);
 export const isEndJourneyAtom = atom(false);

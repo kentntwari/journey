@@ -79,7 +79,7 @@ export function submitCKUpdates(
   intent?: string
 ) {
   const outgoingFormData = new FormData();
-  outgoingFormData.append("slug", checkpointSlug);
+  outgoingFormData.append("checkpointSlug", checkpointSlug);
 
   switch (target) {
     case "milestone":
