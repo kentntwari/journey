@@ -86,6 +86,8 @@ export default function Journey() {
 
   const { data } = useTypedLoaderData<typeof loader>();
 
+  console.log(data);
+
   return (
     <Suspense fallback={<Journey.Skeleton />}>
       <TypedAwait resolve={data} errorElement={<ErrorElement />}>
@@ -106,7 +108,7 @@ export default function Journey() {
                   </Button>
                 </Options>
               </div>
-              <Title />
+              <Title>{currentJourney.title}</Title>
             </header>
             <footer className="grow bg-neutral-grey-300 px-2 py-4 rounded-lg border border-neutral-grey-500 shadow-none">
               <JotaiScopedProvider atoms={[isDialogOpenAtom]}>

@@ -1,3 +1,5 @@
+import type { ComponentPropsWithoutRef } from "react";
+
 import { useRef } from "react";
 
 import { useAtom } from "jotai";
@@ -18,7 +20,11 @@ import { TextAreaConform } from "~/components/conform/TextArea";
 import { journeySchema } from "~/utils/schemas";
 import { isEditJourneyTitleAtom } from "~/utils/atoms";
 
-export function Title() {
+interface ICurrentJourneyTitleProps {
+  children: string;
+}
+
+export function Title({ children }: ICurrentJourneyTitleProps) {
   const params = useParams();
 
   const submit = useSubmit();
@@ -63,7 +69,7 @@ export function Title() {
             isEditTitle ? "opacity-60" : "opacity-100"
           }`}
         >
-          {params.slug}
+          {children}
         </h1>
       </Popover.PopoverTrigger>
       <Popover.PopoverContent className="p-0 border-none">

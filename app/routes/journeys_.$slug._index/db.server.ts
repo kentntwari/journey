@@ -9,6 +9,7 @@ export async function getJourney(slug: string) {
       },
       select: {
         id: true,
+        title: true,
         isEnded: true,
       },
     });
